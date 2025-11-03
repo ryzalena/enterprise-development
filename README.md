@@ -2,6 +2,16 @@
 [Таблица с успеваемостью](https://docs.google.com/spreadsheets/d/1JD6aiOG6r7GrA79oJncjgUHWtfeW4g_YZ9ayNgxb_w0/edit?usp=sharing)
 
 ## Задание
+
+### Вариант
+Вариант: 17
+
+Доменная область: поликлинника
+
+База данных: MS SQL Server
+
+Шина: NATS
+
 ### Цель
 Реализация проекта сервисно-ориентированного приложения.
 
