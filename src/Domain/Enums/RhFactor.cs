@@ -1,4 +1,4 @@
-﻿namespace policlinicApp.Domain.Enums;
+﻿namespace Domain.Enums;
 
 public enum RhFactor
 {
