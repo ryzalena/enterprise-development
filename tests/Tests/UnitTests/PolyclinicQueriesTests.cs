@@ -8,7 +8,7 @@ namespace Tests.UnitTests;
 /// <summary>
 /// Тесты для проверки LINQ запросов поликлиники
 /// </summary>
-public class PolyclinicQueriesTests
+public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
 {
     private readonly List<Patient> _patients;
     private readonly List<Doctor> _doctors;
@@ -16,14 +16,15 @@ public class PolyclinicQueriesTests
     private readonly List<Specialization> _specializations;
 
     /// <summary>
-    /// Инициализация тестовых данных
+    /// Инициализация тестовых данных через primary constructor
     /// </summary>
-    public PolyclinicQueriesTests()
+    /// <param name="fixture">Фикстура с тестовыми данными</param>
+    public PolyclinicQueriesTests(TestDataFixture fixture)
     {
-        _patients = TestData.Patients;
-        _doctors = TestData.Doctors;
-        _appointments = TestData.Appointments;
-        _specializations = TestData.Specializations;
+        _patients = fixture.Patients;
+        _doctors = fixture.Doctors;
+        _appointments = fixture.Appointments;
+        _specializations = fixture.Specializations;
     }
 
     /// <summary>
@@ -127,4 +128,30 @@ public class PolyclinicQueriesTests
         Assert.Equal(2, result.Count);
         Assert.All(result, a => Assert.Equal(roomNumber, a.RoomNumber));
     }
+}
+
+/// <summary>
+/// Фикстура для предоставления тестовых данных
+/// </summary>
+public class TestDataFixture
+{
+    /// <summary>
+    /// Список пациентов
+    /// </summary>
+    public List<Patient> Patients { get; } = TestData.Patients;
+    
+    /// <summary>
+    /// Список врачей
+    /// </summary>
+    public List<Doctor> Doctors { get; } = TestData.Doctors;
+    
+    /// <summary>
+    /// Список записей на прием
+    /// </summary>
+    public List<Appointment> Appointments { get; } = TestData.Appointments;
+    
+    /// <summary>
+    /// Список специализаций
+    /// </summary>
+    public List<Specialization> Specializations { get; } = TestData.Specializations;
 }
