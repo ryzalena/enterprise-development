@@ -34,7 +34,7 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetDoctorsWithExperience_WhenMinExperience10Years_ReturnsDoctorsWithAtLeast10YearsExperience()
     {
         // Arrange
-        var minExperience = 10;
+        const int minExperience = 10;
 
         // Act
         var result = _doctors
@@ -104,9 +104,12 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     [Fact]
     public void GetPatientsOver30WithMultipleDoctors_WhenCalled_ReturnsPatientsOver30WithMultipleDoctorsOrderedByBirthDate()
     {
+        // Arrange
+        var referenceDate = new DateTime(2024, 1, 1); // Фиксированная дата для расчета возраста
+
         // Act
         var result = _appointments
-            .Where(a => a.Patient.Age > 30)
+            .Where(a => CalculateAge(a.Patient.BirthDate, referenceDate) > 30)
             .GroupBy(a => a.Patient)
             .Where(g => g.Select(a => a.DoctorId).Distinct().Count() > 1)
             .Select(g => g.Key)
@@ -118,7 +121,8 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         
         if (result.Any())
         {
-            Assert.All(result, p => Assert.True(p.Age > 30));
+            // Проверяем возраст относительно фиксированной даты
+            Assert.All(result, p => Assert.True(CalculateAge(p.BirthDate, referenceDate) > 30));
             
             // Проверяем, что у каждого пациента действительно > 1 врача
             foreach (var patient in result)
@@ -170,6 +174,26 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
             Assert.Equal(referenceDate.Month, a.AppointmentDateTime.Month);
             Assert.Equal(referenceDate.Year, a.AppointmentDateTime.Year);
         });
+    }
+
+    /// <summary>
+    /// Вспомогательный метод для расчета возраста относительно фиксированной даты
+    /// </summary>
+    /// <param name="birthDate">Дата рождения</param>
+    /// <param name="referenceDate">Опорная дата для расчета</param>
+    /// <returns>Возраст в годах</returns>
+    private static int CalculateAge(DateOnly birthDate, DateTime referenceDate)
+    {
+        var today = DateOnly.FromDateTime(referenceDate);
+        var age = today.Year - birthDate.Year;
+        
+        // Если день рождения еще не наступил в этом году, вычитаем 1 год
+        if (birthDate > today.AddYears(-age))
+        {
+            age--;
+        }
+        
+        return age;
     }
 }
 
