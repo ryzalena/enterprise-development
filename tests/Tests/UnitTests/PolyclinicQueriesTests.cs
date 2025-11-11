@@ -34,7 +34,7 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetDoctorsWithExperience_WhenMinExperience10Years_ReturnsDoctorsWithAtLeast10YearsExperience()
     {
         // Arrange
-        const int minExperience = 10;
+        var minExperience = 10;
 
         // Act
         var result = _doctors
@@ -66,6 +66,11 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         // Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
+        
+        // Проверяем, что список действительно отсортирован по ФИО
+        var expectedOrder = result.Select(p => p.FullName).OrderBy(name => name).ToList();
+        var actualOrder = result.Select(p => p.FullName).ToList();
+        Assert.Equal(expectedOrder, actualOrder);
     }
 
     /// <summary>
@@ -74,8 +79,10 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     [Fact]
     public void GetFollowUpAppointmentsCountLastMonth_WhenCalled_ReturnsCorrectCount()
     {
-        // Act
+        // Arrange
         var lastMonth = DateTime.Now.AddMonths(-1);
+
+        // Act
         var result = _appointments
             .Count(a => a.IsFollowUp && 
                        a.AppointmentDateTime.Month == lastMonth.Month && 
@@ -104,6 +111,22 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         Assert.NotNull(result);
         Assert.NotEmpty(result);
         Assert.All(result, p => Assert.True(p.Age > 30));
+        
+        // Проверяем, что у каждого пациента действительно > 1 врача
+        foreach (var patient in result)
+        {
+            var doctorCount = _appointments
+                .Where(a => a.Patient.Id == patient.Id)
+                .Select(a => a.DoctorId)
+                .Distinct()
+                .Count();
+            Assert.True(doctorCount > 1);
+        }
+        
+        // Проверяем сортировку по дате рождения
+        var expectedBirthDateOrder = result.Select(p => p.BirthDate).OrderBy(bd => bd).ToList();
+        var actualBirthDateOrder = result.Select(p => p.BirthDate).ToList();
+        Assert.Equal(expectedBirthDateOrder, actualBirthDateOrder);
     }
 
     /// <summary>
@@ -114,7 +137,7 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     {
         // Arrange
         const string roomNumber = "101";
-        DateTime currentDate = DateTime.Now;
+        var currentDate = DateTime.Now;
 
         // Act
         var result = _appointments
@@ -127,6 +150,11 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
         Assert.All(result, a => Assert.Equal(roomNumber, a.RoomNumber));
+        Assert.All(result, a => 
+        {
+            Assert.Equal(currentDate.Month, a.AppointmentDateTime.Month);
+            Assert.Equal(currentDate.Year, a.AppointmentDateTime.Year);
+        });
     }
 }
 
