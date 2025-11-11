@@ -6,7 +6,12 @@
 public class Doctor
 {
     /// <summary>
-    /// Номер паспорта врача (уникальный идентификатор)
+    /// Уникальный идентификатор врача
+    /// </summary>
+    public required int Id { get; set; }
+    
+    /// <summary>
+    /// Номер паспорта врача
     /// </summary>
     public required string PassportNumber { get; set; }
     

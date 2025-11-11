@@ -8,7 +8,12 @@ namespace Domain.Entities;
 public class Patient
 {
     /// <summary>
-    /// Номер паспорта пациента (уникальный идентификатор)
+    /// Уникальный идентификатор пациента
+    /// </summary>
+    public required int Id { get; set; }
+    
+    /// <summary>
+    /// Номер паспорта пациента
     /// </summary>
     public required string PassportNumber { get; set; }
     

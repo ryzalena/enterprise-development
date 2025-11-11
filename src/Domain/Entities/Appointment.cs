@@ -11,9 +11,19 @@ public class Appointment
     public required int Id { get; set; }
     
     /// <summary>
+    /// Идентификатор пациента
+    /// </summary>
+    public required int PatientId { get; set; }
+    
+    /// <summary>
     /// Пациент, записанный на прием
     /// </summary>
     public required Patient Patient { get; set; }
+    
+    /// <summary>
+    /// Идентификатор врача
+    /// </summary>
+    public required int DoctorId { get; set; }
     
     /// <summary>
     /// Врач, к которому записан пациент

@@ -49,14 +49,14 @@ public class PolyclinicQueriesTests
     /// Тест: Получение пациентов конкретного врача, отсортированных по ФИО
     /// </summary>
     [Fact]
-    public void GetPatientsByDoctorOrderedByName_WhenValidDoctorPassport_ReturnsOrderedPatients()
+    public void GetPatientsByDoctorOrderedByName_WhenValidDoctorId_ReturnsOrderedPatients()
     {
         // Arrange
-        var doctorPassport = "CD200001";
+        var doctorId = 1;
 
         // Act
         var result = _appointments
-            .Where(a => a.Doctor.PassportNumber == doctorPassport)
+            .Where(a => a.DoctorId == doctorId)
             .Select(a => a.Patient)
             .Distinct()
             .OrderBy(p => p.FullName)
@@ -94,7 +94,7 @@ public class PolyclinicQueriesTests
         var result = _appointments
             .Where(a => a.Patient.Age > 30)
             .GroupBy(a => a.Patient)
-            .Where(g => g.Select(a => a.Doctor.PassportNumber).Distinct().Count() > 1)
+            .Where(g => g.Select(a => a.DoctorId).Distinct().Count() > 1)
             .Select(g => g.Key)
             .OrderBy(p => p.BirthDate)
             .ToList();
