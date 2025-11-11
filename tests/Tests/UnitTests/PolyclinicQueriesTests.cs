@@ -119,6 +119,19 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         // Assert
         Assert.NotNull(result);
         
+        // Проверяем ожидаемое количество пациентов
+        var expectedPatients = _patients
+            .Where(p => CalculateAge(p.BirthDate, referenceDate) > 30)
+            .Where(p => _appointments
+                .Where(a => a.Patient.Id == p.Id)
+                .Select(a => a.DoctorId)
+                .Distinct()
+                .Count() > 1)
+            .OrderBy(p => p.BirthDate)
+            .ToList();
+    
+        Assert.Equal(expectedPatients.Count, result.Count);
+        
         if (result.Any())
         {
             // Проверяем возраст относительно фиксированной даты
@@ -139,6 +152,11 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
             var expectedBirthDateOrder = result.Select(p => p.BirthDate).OrderBy(bd => bd).ToList();
             var actualBirthDateOrder = result.Select(p => p.BirthDate).ToList();
             Assert.Equal(expectedBirthDateOrder, actualBirthDateOrder);
+            
+            // Проверяем, что вернулись правильные пациенты
+            var expectedPatientIds = expectedPatients.Select(p => p.Id).OrderBy(id => id).ToList();
+            var actualPatientIds = result.Select(p => p.Id).OrderBy(id => id).ToList();
+            Assert.Equal(expectedPatientIds, actualPatientIds);
         }
     }
 
