@@ -250,7 +250,7 @@ public static class TestData
             Patient = Patients[2], 
             DoctorId = 1, 
             Doctor = Doctors[0], 
-            AppointmentDateTime = DateTime.Now.AddMonths(-1).AddDays(-5), 
+            AppointmentDateTime = new DateTime(2023, 12, 20, 10, 0, 0),
             RoomNumber = "105", 
             IsFollowUp = true 
         },
@@ -261,7 +261,7 @@ public static class TestData
             Patient = Patients[3], 
             DoctorId = 2, 
             Doctor = Doctors[1], 
-            AppointmentDateTime = DateTime.Now.AddMonths(-1).AddDays(-10), 
+            AppointmentDateTime = new DateTime(2023, 12, 15, 14, 0, 0),
             RoomNumber = "106", 
             IsFollowUp = true 
         },
@@ -272,7 +272,7 @@ public static class TestData
             Patient = Patients[4], 
             DoctorId = 3, 
             Doctor = Doctors[2], 
-            AppointmentDateTime = DateTime.Now.AddDays(-2), 
+            AppointmentDateTime = new DateTime(2024, 1, 13, 9, 0, 0),
             RoomNumber = "101", 
             IsFollowUp = false 
         },
@@ -283,7 +283,7 @@ public static class TestData
             Patient = Patients[0], 
             DoctorId = 4, 
             Doctor = Doctors[3], 
-            AppointmentDateTime = DateTime.Now.AddDays(-5), 
+            AppointmentDateTime = new DateTime(2024, 1, 10, 11, 0, 0),
             RoomNumber = "101", 
             IsFollowUp = true 
         }
