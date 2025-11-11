@@ -30,7 +30,7 @@ public class Patient
     /// <summary>
     /// Дата рождения пациента
     /// </summary>
-    public required DateTime BirthDate { get; set; }
+    public required DateOnly BirthDate { get; set; }
     
     /// <summary>
     /// Адрес проживания пациента

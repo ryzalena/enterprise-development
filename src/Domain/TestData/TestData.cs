@@ -14,20 +14,20 @@ public static class TestData
     public static List<Patient> Patients { get; } = new()
     {
         new Patient { Id = 1, PassportNumber = "AB100001", FullName = "Иванов Иван Иванович", Gender = Gender.Male, 
-                     BirthDate = new DateTime(1980, 5, 15), Address = "ул. Ленина, д. 1", 
-                     BloodGroup = BloodGroup.A, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (915) 111-2233" },
+            BirthDate = new DateOnly(1980, 5, 15), Address = "ул. Ленина, д. 1", 
+            BloodGroup = BloodGroup.A, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (915) 111-2233" },
         new Patient { Id = 2, PassportNumber = "AB100002", FullName = "Петрова Ольга Сергеевна", Gender = Gender.Female, 
-                     BirthDate = new DateTime(1975, 8, 20), Address = "ул. Мира, д. 25", 
-                     BloodGroup = BloodGroup.B, RhFactor = RhFactor.Negative, PhoneNumber = "+7 (916) 222-3344" },
+            BirthDate = new DateOnly(1975, 8, 20), Address = "ул. Мира, д. 25", 
+            BloodGroup = BloodGroup.B, RhFactor = RhFactor.Negative, PhoneNumber = "+7 (916) 222-3344" },
         new Patient { Id = 3, PassportNumber = "AB100003", FullName = "Сидоров Алексей Петрович", Gender = Gender.Male, 
-                     BirthDate = new DateTime(1990, 3, 10), Address = "ул. Советская, д. 15", 
-                     BloodGroup = BloodGroup.O, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (917) 333-4455" },
+            BirthDate = new DateOnly(1990, 3, 10), Address = "ул. Советская, д. 15", 
+            BloodGroup = BloodGroup.O, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (917) 333-4455" },
         new Patient { Id = 4, PassportNumber = "AB100004", FullName = "Козлова Мария Владимировна", Gender = Gender.Female, 
-                     BirthDate = new DateTime(1985, 12, 5), Address = "ул. Центральная, д. 8", 
-                     BloodGroup = BloodGroup.Ab, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (918) 444-5566" },
+            BirthDate = new DateOnly(1985, 12, 5), Address = "ул. Центральная, д. 8", 
+            BloodGroup = BloodGroup.Ab, RhFactor = RhFactor.Positive, PhoneNumber = "+7 (918) 444-5566" },
         new Patient { Id = 5, PassportNumber = "AB100005", FullName = "Федоров Дмитрий Николаевич", Gender = Gender.Male, 
-                     BirthDate = new DateTime(1970, 7, 30), Address = "ул. Школьная, д. 12", 
-                     BloodGroup = BloodGroup.A, RhFactor = RhFactor.Negative, PhoneNumber = "+7 (919) 555-6677" }
+            BirthDate = new DateOnly(1970, 7, 30), Address = "ул. Школьная, д. 12", 
+            BloodGroup = BloodGroup.A, RhFactor = RhFactor.Negative, PhoneNumber = "+7 (919) 555-6677" }
     };
 
     /// <summary>
