@@ -34,7 +34,7 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetDoctorsWithExperience_WhenMinExperience10Years_ReturnsDoctorsWithAtLeast10YearsExperience()
     {
         // Arrange
-        var minExperience = 10;
+        const int minExperience = 10;
 
         // Act
         var result = _doctors
@@ -113,8 +113,8 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetAppointmentsInRoomForCurrentMonth_WhenValidRoomNumber_ReturnsAppointmentsForCurrentMonth()
     {
         // Arrange
-        var roomNumber = "101";
-        var currentDate = DateTime.Now;
+        const string roomNumber = "101";
+        DateTime currentDate = DateTime.Now;
 
         // Act
         var result = _appointments
