@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿// PolyclinicQueriesTests.cs
+using Domain.Entities;
 using Domain.Enums;
 using Domain.TestData;
 using Xunit;
@@ -8,24 +9,15 @@ namespace Tests.UnitTests;
 /// <summary>
 /// Тесты для проверки LINQ запросов поликлиники
 /// </summary>
-public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
+/// <remarks>
+/// Использует primary constructor для инъекции тестовых данных
+/// </remarks>
+public class PolyclinicQueriesTests(TestDataFixture fixture) : IClassFixture<TestDataFixture>
 {
-    private readonly List<Patient> _patients;
-    private readonly List<Doctor> _doctors;
-    private readonly List<Appointment> _appointments;
-    private readonly List<Specialization> _specializations;
-
-    /// <summary>
-    /// Инициализация тестовых данных через primary constructor
-    /// </summary>
-    /// <param name="fixture">Фикстура с тестовыми данными</param>
-    public PolyclinicQueriesTests(TestDataFixture fixture)
-    {
-        _patients = fixture.Patients;
-        _doctors = fixture.Doctors;
-        _appointments = fixture.Appointments;
-        _specializations = fixture.Specializations;
-    }
+    private readonly List<Patient> _patients = fixture.Patients;
+    private readonly List<Doctor> _doctors = fixture.Doctors;
+    private readonly List<Appointment> _appointments = fixture.Appointments;
+    private readonly List<Specialization> _specializations = fixture.Specializations;
 
     /// <summary>
     /// Тест: Получение врачей со стажем работы не менее указанного количества лет
@@ -35,15 +27,22 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     {
         // Arrange
         const int minExperience = 10;
+        
+        // Ожидаемые врачи со стажем >= 10 лет 
+        var expectedDoctorIds = new List<int> { 1, 2, 3, 4, 6, 7, 8, 9 };
 
         // Act
         var result = _doctors
             .Where(d => d.ExperienceYears >= minExperience)
+            .OrderBy(d => d.Id)
             .ToList();
 
         // Assert
         Assert.NotNull(result);
-        Assert.All(result, d => Assert.True(d.ExperienceYears >= minExperience));
+        Assert.Equal(expectedDoctorIds.Count, result.Count);
+        
+        var actualDoctorIds = result.Select(d => d.Id).ToList();
+        Assert.Equal(expectedDoctorIds, actualDoctorIds);
     }
 
     /// <summary>
@@ -54,6 +53,14 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     {
         // Arrange
         var doctorId = 1;
+        
+        // Ожидаемые пациенты врача с ID 1 
+        var expectedPatientIds = new List<int> { 1, 3 };
+        var expectedNamesOrder = new List<string> 
+        { 
+            "Иванов Иван Иванович", 
+            "Сидоров Алексей Петрович" 
+        };
 
         // Act
         var result = _appointments
@@ -65,12 +72,13 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count); // Пациенты с ID 1 и 3
+        Assert.Equal(expectedPatientIds.Count, result.Count);
         
-        // Проверяем сортировку по ФИО
-        var expectedOrder = result.Select(p => p.FullName).OrderBy(name => name).ToList();
-        var actualOrder = result.Select(p => p.FullName).ToList();
-        Assert.Equal(expectedOrder, actualOrder);
+        var actualPatientIds = result.Select(p => p.Id).ToList();
+        Assert.Equal(expectedPatientIds, actualPatientIds);
+        
+        var actualNames = result.Select(p => p.FullName).ToList();
+        Assert.Equal(expectedNamesOrder, actualNames);
     }
 
     /// <summary>
@@ -80,8 +88,11 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetFollowUpAppointmentsCountLastMonth_WhenCalled_ReturnsCorrectCount()
     {
         // Arrange
-        var referenceDate = new DateTime(2024, 2, 1); // Фиксированная дата для тестов
+        var referenceDate = new DateTime(2024, 2, 1);
         var lastMonth = referenceDate.AddMonths(-1); // Январь 2024
+        
+        // Ожидаемое количество повторных приемов 
+        const int expectedCount = 1;
 
         // Act
         var result = _appointments
@@ -90,11 +101,6 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
                        a.AppointmentDateTime.Year == lastMonth.Year);
 
         // Assert
-        var expectedCount = _appointments
-            .Count(a => a.IsFollowUp && 
-                       a.AppointmentDateTime.Month == lastMonth.Month && 
-                       a.AppointmentDateTime.Year == lastMonth.Year);
-        
         Assert.Equal(expectedCount, result);
     }
 
@@ -105,11 +111,19 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
     public void GetPatientsOver30WithMultipleDoctors_WhenCalled_ReturnsPatientsOver30WithMultipleDoctorsOrderedByBirthDate()
     {
         // Arrange
-        var referenceDate = new DateTime(2024, 1, 1); // Фиксированная дата для расчета возраста
+        var referenceDate = new DateTime(2024, 1, 1);
+        
+        // Ожидаемые пациенты
+        var expectedPatientIds = new List<int> { 2, 1 };
+        var expectedBirthDateOrder = new List<DateOnly>
+        {
+            new DateOnly(1975, 8, 20), 
+            new DateOnly(1980, 5, 15) 
+        };
 
         // Act
         var result = _appointments
-            .Where(a => CalculateAge(a.Patient.BirthDate, referenceDate) > 30)
+            .Where(a => a.Patient.BirthDate <= DateOnly.FromDateTime(referenceDate.AddYears(-30)))
             .GroupBy(a => a.Patient)
             .Where(g => g.Select(a => a.DoctorId).Distinct().Count() > 1)
             .Select(g => g.Key)
@@ -118,46 +132,13 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
 
         // Assert
         Assert.NotNull(result);
+        Assert.Equal(expectedPatientIds.Count, result.Count);
         
-        // Проверяем ожидаемое количество пациентов
-        var expectedPatients = _patients
-            .Where(p => CalculateAge(p.BirthDate, referenceDate) > 30)
-            .Where(p => _appointments
-                .Where(a => a.Patient.Id == p.Id)
-                .Select(a => a.DoctorId)
-                .Distinct()
-                .Count() > 1)
-            .OrderBy(p => p.BirthDate)
-            .ToList();
-    
-        Assert.Equal(expectedPatients.Count, result.Count);
+        var actualPatientIds = result.Select(p => p.Id).ToList();
+        Assert.Equal(expectedPatientIds, actualPatientIds);
         
-        if (result.Any())
-        {
-            // Проверяем возраст относительно фиксированной даты
-            Assert.All(result, p => Assert.True(CalculateAge(p.BirthDate, referenceDate) > 30));
-            
-            // Проверяем, что у каждого пациента действительно > 1 врача
-            foreach (var patient in result)
-            {
-                var doctorCount = _appointments
-                    .Where(a => a.Patient.Id == patient.Id)
-                    .Select(a => a.DoctorId)
-                    .Distinct()
-                    .Count();
-                Assert.True(doctorCount > 1);
-            }
-            
-            // Проверяем сортировку по дате рождения
-            var expectedBirthDateOrder = result.Select(p => p.BirthDate).OrderBy(bd => bd).ToList();
-            var actualBirthDateOrder = result.Select(p => p.BirthDate).ToList();
-            Assert.Equal(expectedBirthDateOrder, actualBirthDateOrder);
-            
-            // Проверяем, что вернулись правильные пациенты
-            var expectedPatientIds = expectedPatients.Select(p => p.Id).OrderBy(id => id).ToList();
-            var actualPatientIds = result.Select(p => p.Id).OrderBy(id => id).ToList();
-            Assert.Equal(expectedPatientIds, actualPatientIds);
-        }
+        var actualBirthDates = result.Select(p => p.BirthDate).ToList();
+        Assert.Equal(expectedBirthDateOrder, actualBirthDates);
     }
 
     /// <summary>
@@ -169,74 +150,24 @@ public class PolyclinicQueriesTests : IClassFixture<TestDataFixture>
         // Arrange
         const string roomNumber = "101";
         var referenceDate = new DateTime(2024, 1, 15);
+        
+        // Ожидаемые записи 
+        var expectedAppointmentIds = new List<int> { 1 };
+        const int expectedCount = 1;
 
         // Act
         var result = _appointments
             .Where(a => a.RoomNumber == roomNumber && 
                        a.AppointmentDateTime.Month == referenceDate.Month && 
                        a.AppointmentDateTime.Year == referenceDate.Year)
+            .OrderBy(a => a.Id)
             .ToList();
 
         // Assert
         Assert.NotNull(result);
-        
-        var expectedCount = _appointments
-            .Count(a => a.RoomNumber == roomNumber && 
-                       a.AppointmentDateTime.Month == referenceDate.Month && 
-                       a.AppointmentDateTime.Year == referenceDate.Year);
-        
         Assert.Equal(expectedCount, result.Count);
-        Assert.All(result, a => Assert.Equal(roomNumber, a.RoomNumber));
-        Assert.All(result, a => 
-        {
-            Assert.Equal(referenceDate.Month, a.AppointmentDateTime.Month);
-            Assert.Equal(referenceDate.Year, a.AppointmentDateTime.Year);
-        });
-    }
-
-    /// <summary>
-    /// Вспомогательный метод для расчета возраста относительно фиксированной даты
-    /// </summary>
-    /// <param name="birthDate">Дата рождения</param>
-    /// <param name="referenceDate">Опорная дата для расчета</param>
-    /// <returns>Возраст в годах</returns>
-    private static int CalculateAge(DateOnly birthDate, DateTime referenceDate)
-    {
-        var today = DateOnly.FromDateTime(referenceDate);
-        var age = today.Year - birthDate.Year;
         
-        // Если день рождения еще не наступил в этом году, вычитаем 1 год
-        if (birthDate > today.AddYears(-age))
-        {
-            age--;
-        }
-        
-        return age;
+        var actualAppointmentIds = result.Select(a => a.Id).ToList();
+        Assert.Equal(expectedAppointmentIds, actualAppointmentIds);
     }
-}
-
-/// <summary>
-/// Фикстура для предоставления тестовых данных
-/// </summary>
-public class TestDataFixture
-{
-    /// <summary>
-    /// Список пациентов
-    /// </summary>
-    public List<Patient> Patients { get; } = TestData.Patients;
-    
-    /// <summary>
-    /// Список врачей
-    /// </summary>
-    public List<Doctor> Doctors { get; } = TestData.Doctors;
-    
-    /// <summary>
-    /// Список записей на прием
-    /// </summary>
-    public List<Appointment> Appointments { get; } = TestData.Appointments;
-    
-    /// <summary>
-    /// Список специализаций
-    /// </summary>
-    public List<Specialization> Specializations { get; } = TestData.Specializations;
 }
