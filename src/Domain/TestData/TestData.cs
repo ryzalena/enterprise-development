@@ -72,6 +72,66 @@ public static class TestData
             BloodGroup = BloodGroup.A, 
             RhFactor = RhFactor.Negative, 
             PhoneNumber = "+7 (919) 555-6677" 
+        },
+        new Patient 
+        { 
+            Id = 6,
+            PassportNumber = "AB100006", 
+            FullName = "Николаева Екатерина Андреевна", 
+            Gender = Gender.Female, 
+            BirthDate = new DateOnly(1988, 2, 14), 
+            Address = "ул. Парковая, д. 7", 
+            BloodGroup = BloodGroup.B, 
+            RhFactor = RhFactor.Positive, 
+            PhoneNumber = "+7 (920) 666-7788" 
+        },
+        new Patient 
+        { 
+            Id = 7,
+            PassportNumber = "AB100007", 
+            FullName = "Волков Сергей Михайлович", 
+            Gender = Gender.Male, 
+            BirthDate = new DateOnly(1978, 11, 8), 
+            Address = "ул. Лесная, д. 18", 
+            BloodGroup = BloodGroup.O, 
+            RhFactor = RhFactor.Negative, 
+            PhoneNumber = "+7 (921) 777-8899" 
+        },
+        new Patient 
+        { 
+            Id = 8,
+            PassportNumber = "AB100008", 
+            FullName = "Смирнова Анна Дмитриевна", 
+            Gender = Gender.Female, 
+            BirthDate = new DateOnly(1992, 6, 12), 
+            Address = "ул. Новая, д. 22", 
+            BloodGroup = BloodGroup.Ab, 
+            RhFactor = RhFactor.Negative, 
+            PhoneNumber = "+7 (922) 888-9900" 
+        },
+        new Patient 
+        { 
+            Id = 9,
+            PassportNumber = "AB100009", 
+            FullName = "Попов Андрей Викторович", 
+            Gender = Gender.Male, 
+            BirthDate = new DateOnly(1983, 4, 17), 
+            Address = "ул. Заречная, д. 9", 
+            BloodGroup = BloodGroup.A, 
+            RhFactor = RhFactor.Positive, 
+            PhoneNumber = "+7 (923) 999-0011" 
+        },
+        new Patient 
+        { 
+            Id = 10,
+            PassportNumber = "AB100010", 
+            FullName = "Васильева Татьяна Олеговна", 
+            Gender = Gender.Female, 
+            BirthDate = new DateOnly(1973, 9, 25), 
+            Address = "ул. Солнечная, д. 14", 
+            BloodGroup = BloodGroup.B, 
+            RhFactor = RhFactor.Positive, 
+            PhoneNumber = "+7 (924) 000-1122" 
         }
     ];
 
@@ -110,40 +170,40 @@ public static class TestData
             Name = "Офтальмолог", 
             Description = "Лечение заболеваний глаз" 
         },
-        new Specialization
-        {
+        new Specialization 
+        { 
             Id = 6, 
             Name = "Стоматолог", 
-            Description = "Лечение зубов"
+            Description = "Лечение зубов" 
         },
-        new Specialization
-        {
+        new Specialization 
+        { 
             Id = 7, 
             Name = "Дерматолог", 
-            Description = "Лечение кожи"
+            Description = "Лечение кожи" 
         },
-        new Specialization
-        {
+        new Specialization 
+        { 
             Id = 8, 
             Name = "Гастроэнтеролог", 
-            Description = "Лечение ЖКТ"
+            Description = "Лечение ЖКТ" 
         },
-        new Specialization
-        {
+        new Specialization 
+        { 
             Id = 9, 
             Name = "Эндокринолог", 
-            Description = "Лечение гормонов"
+            Description = "Лечение гормонов" 
         },
-        new Specialization
-        {
+        new Specialization 
+        { 
             Id = 10, 
             Name = "Педиатр", 
-            Description = "Детский врач"
+            Description = "Детский врач" 
         }
     ];
 
     /// <summary>
-    /// Список врачей поликлиники
+    /// Список врачей поликлиники 
     /// </summary>
     public static List<Doctor> Doctors { get; } =
     [
@@ -191,6 +251,51 @@ public static class TestData
             BirthYear = 1985, 
             Specialization = Specializations[1], 
             ExperienceYears = 8 
+        },
+        new Doctor 
+        { 
+            Id = 6,
+            PassportNumber = "CD200006", 
+            FullName = "Терапевтова Ирина Алексеевна", 
+            BirthYear = 1978, 
+            Specialization = Specializations[0], 
+            ExperienceYears = 17 
+        },
+        new Doctor 
+        { 
+            Id = 7,
+            PassportNumber = "CD200007", 
+            FullName = "Кардиологов Михаил Викторович", 
+            BirthYear = 1968, 
+            Specialization = Specializations[2], 
+            ExperienceYears = 27 
+        },
+        new Doctor 
+        { 
+            Id = 8,
+            PassportNumber = "CD200008", 
+            FullName = "Невролова Светлана Дмитриевна", 
+            BirthYear = 1982, 
+            Specialization = Specializations[3], 
+            ExperienceYears = 12 
+        },
+        new Doctor 
+        { 
+            Id = 9,
+            PassportNumber = "CD200009", 
+            FullName = "Офтальмологов Андрей Сергеевич", 
+            BirthYear = 1973, 
+            Specialization = Specializations[4], 
+            ExperienceYears = 22 
+        },
+        new Doctor 
+        { 
+            Id = 10,
+            PassportNumber = "CD200010", 
+            FullName = "Стоматолова Мария Петровна", 
+            BirthYear = 1987, 
+            Specialization = Specializations[5], 
+            ExperienceYears = 6 
         }
     ];
 
@@ -250,7 +355,7 @@ public static class TestData
             Patient = Patients[2], 
             DoctorId = 1, 
             Doctor = Doctors[0], 
-            AppointmentDateTime = new DateTime(2023, 12, 20, 10, 0, 0),
+            AppointmentDateTime = DateTime.Now.AddMonths(-1).AddDays(-5), 
             RoomNumber = "105", 
             IsFollowUp = true 
         },
@@ -261,7 +366,7 @@ public static class TestData
             Patient = Patients[3], 
             DoctorId = 2, 
             Doctor = Doctors[1], 
-            AppointmentDateTime = new DateTime(2023, 12, 15, 14, 0, 0),
+            AppointmentDateTime = DateTime.Now.AddMonths(-1).AddDays(-10), 
             RoomNumber = "106", 
             IsFollowUp = true 
         },
@@ -272,7 +377,7 @@ public static class TestData
             Patient = Patients[4], 
             DoctorId = 3, 
             Doctor = Doctors[2], 
-            AppointmentDateTime = new DateTime(2024, 1, 13, 9, 0, 0),
+            AppointmentDateTime = DateTime.Now.AddDays(-2), 
             RoomNumber = "101", 
             IsFollowUp = false 
         },
@@ -283,9 +388,31 @@ public static class TestData
             Patient = Patients[0], 
             DoctorId = 4, 
             Doctor = Doctors[3], 
-            AppointmentDateTime = new DateTime(2024, 1, 10, 11, 0, 0),
+            AppointmentDateTime = DateTime.Now.AddDays(-5), 
             RoomNumber = "101", 
             IsFollowUp = true 
+        },
+        new Appointment 
+        { 
+            Id = 9, 
+            PatientId = 6, 
+            Patient = Patients[5], 
+            DoctorId = 5, 
+            Doctor = Doctors[4], 
+            AppointmentDateTime = new DateTime(2024, 1, 18, 16, 0, 0), 
+            RoomNumber = "107", 
+            IsFollowUp = false 
+        },
+        new Appointment 
+        { 
+            Id = 10, 
+            PatientId = 7, 
+            Patient = Patients[6], 
+            DoctorId = 6, 
+            Doctor = Doctors[5], 
+            AppointmentDateTime = new DateTime(2024, 1, 22, 13, 0, 0), 
+            RoomNumber = "108", 
+            IsFollowUp = false 
         }
     ];
 }
