@@ -1,8 +1,7 @@
 ﻿namespace Application.Dtos;
 
-public class PatientDto
+public class PatientManipulationDto
 {
-    public int Id { get; set; }
     public required string PassportNumber { get; set; }
     public required string FullName { get; set; }
     public required string Gender { get; set; }
@@ -11,5 +10,4 @@ public class PatientDto
     public required string BloodGroup { get; set; }
     public required string RhFactor { get; set; }
     public required string PhoneNumber { get; set; }
-    public int Age => DateTime.Now.Year - BirthDate.Year; // Только getter
 }
