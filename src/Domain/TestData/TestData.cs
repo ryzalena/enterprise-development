@@ -213,6 +213,7 @@ public static class TestData
             PassportNumber = "CD200001", 
             FullName = "Врачев Александр Петрович", 
             BirthYear = 1970, 
+            SpecializationId = 1,
             Specialization = Specializations[0], 
             ExperienceYears = 25 
         },
@@ -222,6 +223,7 @@ public static class TestData
             PassportNumber = "CD200002", 
             FullName = "Докторова Елена Владимировна", 
             BirthYear = 1980, 
+            SpecializationId = 2,
             Specialization = Specializations[1], 
             ExperienceYears = 15 
         },
@@ -231,6 +233,7 @@ public static class TestData
             PassportNumber = "CD200003", 
             FullName = "Лекарев Сергей Иванович", 
             BirthYear = 1965, 
+            SpecializationId = 3,
             Specialization = Specializations[2], 
             ExperienceYears = 30 
         },
@@ -240,6 +243,7 @@ public static class TestData
             PassportNumber = "CD200004", 
             FullName = "Медицинская Ольга Сергеевна", 
             BirthYear = 1975, 
+            SpecializationId = 4,
             Specialization = Specializations[3], 
             ExperienceYears = 20 
         },
@@ -249,6 +253,7 @@ public static class TestData
             PassportNumber = "CD200005", 
             FullName = "Хирургов Дмитрий Николаевич", 
             BirthYear = 1985, 
+            SpecializationId = 2,
             Specialization = Specializations[1], 
             ExperienceYears = 8 
         },
@@ -258,6 +263,7 @@ public static class TestData
             PassportNumber = "CD200006", 
             FullName = "Терапевтова Ирина Алексеевна", 
             BirthYear = 1978, 
+            SpecializationId = 1,
             Specialization = Specializations[0], 
             ExperienceYears = 17 
         },
@@ -267,6 +273,7 @@ public static class TestData
             PassportNumber = "CD200007", 
             FullName = "Кардиологов Михаил Викторович", 
             BirthYear = 1968, 
+            SpecializationId = 3,
             Specialization = Specializations[2], 
             ExperienceYears = 27 
         },
@@ -276,6 +283,7 @@ public static class TestData
             PassportNumber = "CD200008", 
             FullName = "Невролова Светлана Дмитриевна", 
             BirthYear = 1982, 
+            SpecializationId = 4,
             Specialization = Specializations[3], 
             ExperienceYears = 12 
         },
@@ -285,6 +293,7 @@ public static class TestData
             PassportNumber = "CD200009", 
             FullName = "Офтальмологов Андрей Сергеевич", 
             BirthYear = 1973, 
+            SpecializationId = 5,
             Specialization = Specializations[4], 
             ExperienceYears = 22 
         },
@@ -294,6 +303,7 @@ public static class TestData
             PassportNumber = "CD200010", 
             FullName = "Стоматолова Мария Петровна", 
             BirthYear = 1987, 
+            SpecializationId = 6,
             Specialization = Specializations[5], 
             ExperienceYears = 6 
         }

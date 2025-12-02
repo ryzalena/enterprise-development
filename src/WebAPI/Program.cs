@@ -1,31 +1,49 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Application.Services;
+using Domain.Interfaces;
 
-// Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Polyclinic API",
+        Version = "v1",
+        Description = "API for Polyclinic Management System"
+    });
+});
+
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<ISpecializationService, SpecializationService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Polyclinic API v1");
+    options.RoutePrefix = "swagger";
+    options.DisplayRequestDuration(); 
+});
 
-// Optional: Disable HTTPS redirection to remove warning
-// app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
-// Add a default endpoint for root URL
-app.MapGet("/", () => "WebAPI is running! Visit /swagger for API documentation.");
+app.MapGet("/", () => "Polyclinic WebAPI is running! Visit /swagger for API documentation.");
 
 app.Run();
