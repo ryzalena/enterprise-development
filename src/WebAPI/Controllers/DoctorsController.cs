@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Application.Services;
+using Domain.Interfaces;
 using Application.Dtos;
 using Domain.Entities;
 
@@ -7,26 +7,36 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class DoctorsController : ControllerBase
 {
-    private readonly IPolyclinicService _service;
+    private readonly IDoctorService _doctorService;
+    private readonly IAppointmentService _appointmentService;
+    private readonly ISpecializationService _specializationService;
 
-    public DoctorsController(IPolyclinicService service)
+    public DoctorsController(
+        IDoctorService doctorService, 
+        IAppointmentService appointmentService,
+        ISpecializationService specializationService)
     {
-        _service = service;
+        _doctorService = doctorService;
+        _appointmentService = appointmentService;
+        _specializationService = specializationService;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<DoctorDto>>> GetDoctors()
     {
-        var doctors = await _service.GetDoctorsAsync();
+        var doctors = await _doctorService.GetAllDoctorsAsync();
         var dtos = doctors.Select(d => new DoctorDto
         {
             Id = d.Id,
             PassportNumber = d.PassportNumber,
             FullName = d.FullName,
             BirthYear = d.BirthYear,
-            SpecializationName = d.Specialization.Name,
+            SpecializationId = d.SpecializationId,
+            SpecializationName = d.Specialization?.Name ?? string.Empty,
             ExperienceYears = d.ExperienceYears
         }).ToList();
         
@@ -36,7 +46,7 @@ public class DoctorsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<DoctorDto>> GetDoctor(int id)
     {
-        var doctor = await _service.GetDoctorByIdAsync(id);
+        var doctor = await _doctorService.GetDoctorByIdAsync(id);
         if (doctor == null) return NotFound();
         
         var dto = new DoctorDto
@@ -45,7 +55,8 @@ public class DoctorsController : ControllerBase
             PassportNumber = doctor.PassportNumber,
             FullName = doctor.FullName,
             BirthYear = doctor.BirthYear,
-            SpecializationName = doctor.Specialization.Name,
+            SpecializationId = doctor.SpecializationId,
+            SpecializationName = doctor.Specialization?.Name ?? string.Empty,
             ExperienceYears = doctor.ExperienceYears
         };
         
@@ -53,23 +64,27 @@ public class DoctorsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<DoctorDto>> CreateDoctor(CreateDoctorDto dto)
+    public async Task<ActionResult<DoctorDto>> CreateDoctor(
+        [FromBody] DoctorManipulationDto dto)
     {
+        // Проверяем существование специализации
+        var specialization = await _specializationService.GetSpecializationByIdAsync(dto.SpecializationId);
+        if (specialization == null)
+        {
+            return BadRequest($"Specialization with id {dto.SpecializationId} not found");
+        }
+
         var doctor = new Doctor
         {
-            Id = 0, // будет установлен в сервисе
             PassportNumber = dto.PassportNumber,
             FullName = dto.FullName,
             BirthYear = dto.BirthYear,
             ExperienceYears = dto.ExperienceYears,
-            Specialization = new Specialization 
-            { 
-                Id = 0, // будет установлен в сервисе
-                Name = dto.SpecializationName 
-            }
+            SpecializationId = dto.SpecializationId,
+            Specialization = specialization
         };
         
-        var created = await _service.CreateDoctorAsync(doctor);
+        var created = await _doctorService.CreateDoctorAsync(doctor);
         
         var resultDto = new DoctorDto
         {
@@ -77,7 +92,8 @@ public class DoctorsController : ControllerBase
             PassportNumber = created.PassportNumber,
             FullName = created.FullName,
             BirthYear = created.BirthYear,
-            SpecializationName = created.Specialization.Name,
+            SpecializationId = created.SpecializationId,
+            SpecializationName = specialization.Name,
             ExperienceYears = created.ExperienceYears
         };
         
@@ -85,36 +101,57 @@ public class DoctorsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDoctor(int id, UpdateDoctorDto dto)
+    public async Task<IActionResult> UpdateDoctor(
+        int id, 
+        [FromBody] DoctorManipulationDto dto)
     {
-        var existingDoctor = await _service.GetDoctorByIdAsync(id);
-        if (existingDoctor == null) return NotFound();
+        var existingDoctor = await _doctorService.GetDoctorByIdAsync(id);
+        if (existingDoctor == null) 
+        {
+            return NotFound($"Doctor with id {id} not found");
+        }
+
+        // Проверяем существование специализации
+        var specialization = await _specializationService.GetSpecializationByIdAsync(dto.SpecializationId);
+        if (specialization == null)
+        {
+            return BadRequest($"Specialization with id {dto.SpecializationId} not found");
+        }
 
         existingDoctor.PassportNumber = dto.PassportNumber;
         existingDoctor.FullName = dto.FullName;
         existingDoctor.BirthYear = dto.BirthYear;
         existingDoctor.ExperienceYears = dto.ExperienceYears;
-        existingDoctor.Specialization.Name = dto.SpecializationName;
+        existingDoctor.SpecializationId = dto.SpecializationId;
+        existingDoctor.Specialization = specialization;
         
-        var updated = await _service.UpdateDoctorAsync(id, existingDoctor);
-        if (updated == null) return NotFound();
-        
+        await _doctorService.UpdateDoctorAsync(id, existingDoctor);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDoctor(int id)
     {
-        var result = await _service.DeleteDoctorAsync(id);
-        if (!result) return NotFound();
+        var existingDoctor = await _doctorService.GetDoctorByIdAsync(id);
+        if (existingDoctor == null) 
+        {
+            return NotFound($"Doctor with id {id} not found");
+        }
         
+        await _doctorService.DeleteDoctorAsync(id);
         return NoContent();
     }
 
     [HttpGet("{id}/appointments")]
     public async Task<ActionResult<List<AppointmentDto>>> GetDoctorAppointments(int id)
     {
-        var appointments = await _service.GetAppointmentsByDoctorAsync(id);
+        var doctor = await _doctorService.GetDoctorByIdAsync(id);
+        if (doctor == null)
+        {
+            return NotFound($"Doctor with id {id} not found");
+        }
+
+        var appointments = await _appointmentService.GetAppointmentsByDoctorAsync(id);
         var dtos = appointments.Select(a => new AppointmentDto
         {
             Id = a.Id,
@@ -123,8 +160,8 @@ public class DoctorsController : ControllerBase
             AppointmentDateTime = a.AppointmentDateTime,
             RoomNumber = a.RoomNumber,
             IsFollowUp = a.IsFollowUp,
-            PatientName = a.Patient.FullName,
-            DoctorName = a.Doctor.FullName
+            PatientName = a.Patient?.FullName ?? string.Empty,
+            DoctorName = a.Doctor?.FullName ?? string.Empty
         }).ToList();
         
         return Ok(dtos);
