@@ -56,4 +56,9 @@ public class Patient
     /// Возраст пациента (вычисляемое свойство)
     /// </summary>
     public int Age => DateTime.Now.Year - BirthDate.Year;
+    
+    /// <summary>
+    /// Записи на прием пациента
+    /// </summary>
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 }

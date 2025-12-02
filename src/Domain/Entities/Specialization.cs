@@ -19,4 +19,9 @@ public class Specialization
     /// Описание специализации (опционально)
     /// </summary>
     public string? Description { get; set; }
+    
+    /// <summary>
+    /// Врачи данной специализации
+    /// </summary>
+    public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
 }

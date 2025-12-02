@@ -8,7 +8,7 @@ public class Doctor
     /// <summary>
     /// Уникальный идентификатор врача
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
     
     /// <summary>
     /// Номер паспорта врача
@@ -26,6 +26,11 @@ public class Doctor
     public required int BirthYear { get; set; }
     
     /// <summary>
+    /// Идентификатор специализации врача
+    /// </summary>
+    public required int SpecializationId { get; set; }
+    
+    /// <summary>
     /// Специализация врача
     /// </summary>
     public required Specialization Specialization { get; set; }
@@ -34,4 +39,10 @@ public class Doctor
     /// Стаж работы врача (в годах)
     /// </summary>
     public required int ExperienceYears { get; set; }
+    
+    /// <summary>
+    /// Записи на прием к врачу
+    /// </summary>
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+
 }

@@ -8,7 +8,7 @@ public class Appointment
     /// <summary>
     /// Уникальный идентификатор записи
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
     
     /// <summary>
     /// Идентификатор пациента
@@ -18,7 +18,7 @@ public class Appointment
     /// <summary>
     /// Пациент, записанный на прием
     /// </summary>
-    public required Patient Patient { get; set; }
+    public Patient? Patient { get; set; }
     
     /// <summary>
     /// Идентификатор врача
@@ -28,7 +28,7 @@ public class Appointment
     /// <summary>
     /// Врач, к которому записан пациент
     /// </summary>
-    public required Doctor Doctor { get; set; }
+    public Doctor? Doctor { get; set; }
     
     /// <summary>
     /// Дата и время приема
