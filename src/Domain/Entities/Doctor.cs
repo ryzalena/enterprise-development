@@ -43,6 +43,6 @@ public class Doctor
     /// <summary>
     /// Записи на прием к врачу
     /// </summary>
-    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public ICollection<Appointment> Appointments { get; set; } = [];
 
 }

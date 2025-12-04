@@ -60,5 +60,5 @@ public class Patient
     /// <summary>
     /// Записи на прием пациента
     /// </summary>
-    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public ICollection<Appointment> Appointments { get; set; } = [];
 }

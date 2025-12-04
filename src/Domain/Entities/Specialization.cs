@@ -23,5 +23,5 @@ public class Specialization
     /// <summary>
     /// Врачи данной специализации
     /// </summary>
-    public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
+    public ICollection<Doctor> Doctors { get; set; } = [];
 }
