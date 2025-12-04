@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xmlPath);
     }
 
-    // Если DTO находятся в отдельном проекте Application, добавляем и его XML
+    // Добавляем XML-комментарии из проекта Application (где DTO)
     try
     {
         var dtoAssembly = typeof(Application.Dtos.AppointmentDto).Assembly;
@@ -61,19 +61,29 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Middleware pipeline
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+// Включаем Swagger всегда в Development, в Production можно отключить
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Polyclinic API v1");
-    options.RoutePrefix = "swagger";
-    options.DisplayRequestDuration(); 
-});
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
+{
+    // В Production можно настроить по-другому
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Polyclinic API v1");
+        options.RoutePrefix = "swagger";
+        options.DisplayRequestDuration();
+    });
+}
 
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", () => "Polyclinic WebAPI is running! Visit /swagger for API documentation.");
+// Базовый маршрут
+app.MapGet("/", () => "Polyclinic WebAPI is running!");
 
 app.Run();
