@@ -4,9 +4,9 @@ namespace Domain.Interfaces;
 
 public interface ISpecializationService
 {
-    Task<IEnumerable<Specialization>> GetAllSpecializationsAsync();
-    Task<Specialization?> GetSpecializationByIdAsync(int id);
-    Task<Specialization> CreateSpecializationAsync(Specialization specialization);
-    Task UpdateSpecializationAsync(int id, Specialization specialization);
-    Task DeleteSpecializationAsync(int id);
+    public Task<IEnumerable<Specialization>> GetAllSpecializationsAsync();
+    public Task<Specialization?> GetSpecializationByIdAsync(int id);
+    public Task<Specialization> CreateSpecializationAsync(Specialization specialization);
+    public Task UpdateSpecializationAsync(int id, Specialization specialization);
+    public Task DeleteSpecializationAsync(int id);
 }

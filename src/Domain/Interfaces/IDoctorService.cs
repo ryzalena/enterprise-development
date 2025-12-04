@@ -4,11 +4,11 @@ namespace Domain.Interfaces;
 
 public interface IDoctorService
 {
-    Task<IEnumerable<Doctor>> GetAllDoctorsAsync();
-    Task<Doctor?> GetDoctorByIdAsync(int id);
-    Task<IEnumerable<Doctor>> GetDoctorsBySpecializationAsync(int specializationId);
-    Task<IEnumerable<Doctor>> GetDoctorsWithExperienceAsync(int minExperienceYears);
-    Task<Doctor> CreateDoctorAsync(Doctor doctor);
-    Task UpdateDoctorAsync(int id, Doctor doctor);
-    Task DeleteDoctorAsync(int id);
+    public Task<IEnumerable<Doctor>> GetAllDoctorsAsync();
+    public Task<Doctor?> GetDoctorByIdAsync(int id);
+    public Task<IEnumerable<Doctor>> GetDoctorsBySpecializationAsync(int specializationId);
+    public Task<IEnumerable<Doctor>> GetDoctorsWithExperienceAsync(int minExperienceYears);
+    public Task<Doctor> CreateDoctorAsync(Doctor doctor);
+    public Task UpdateDoctorAsync(int id, Doctor doctor);
+    public Task DeleteDoctorAsync(int id);
 }

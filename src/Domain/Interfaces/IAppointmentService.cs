@@ -4,13 +4,13 @@ namespace Domain.Interfaces;
 
 public interface IAppointmentService
 {
-    Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
-    Task<Appointment?> GetAppointmentByIdAsync(int id);
-    Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId);
-    Task<IEnumerable<Appointment>> GetAppointmentsByPatientAsync(int patientId);
-    Task<IEnumerable<Appointment>> GetAppointmentsByRoomAndDateAsync(string roomNumber, DateTime date);
-    Task<int> GetFollowUpCountLastMonthAsync();
-    Task<Appointment> CreateAppointmentAsync(Appointment appointment);
-    Task UpdateAppointmentAsync(int id, Appointment appointment);
-    Task DeleteAppointmentAsync(int id);
+    public Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
+    public Task<Appointment?> GetAppointmentByIdAsync(int id);
+    public Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId);
+    public Task<IEnumerable<Appointment>> GetAppointmentsByPatientAsync(int patientId);
+    public Task<IEnumerable<Appointment>> GetAppointmentsByRoomAndDateAsync(string roomNumber, DateTime date);
+    public Task<int> GetFollowUpCountLastMonthAsync();
+    public Task<Appointment> CreateAppointmentAsync(Appointment appointment);
+    public Task UpdateAppointmentAsync(int id, Appointment appointment);
+    public Task DeleteAppointmentAsync(int id);
 }
