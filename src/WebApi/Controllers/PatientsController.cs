@@ -10,18 +10,12 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class PatientsController : ControllerBase
+public class PatientsController (
+    IPatientService patientService,
+    IAppointmentService appointmentService) : ControllerBase
 {
-    private readonly IPatientService _patientService;
-    private readonly IAppointmentService _appointmentService;
-
-    public PatientsController(
-        IPatientService patientService, 
-        IAppointmentService appointmentService)
-    {
-        _patientService = patientService;
-        _appointmentService = appointmentService;
-    }
+    private readonly IPatientService _patientService = patientService;
+    private readonly IAppointmentService _appointmentService = appointmentService;
 
     [HttpGet]
     public async Task<ActionResult<List<PatientDto>>> GetPatients()
@@ -147,7 +141,7 @@ public class PatientsController : ControllerBase
         var existingPatient = await _patientService.GetPatientByIdAsync(id);
         if (existingPatient == null) 
         {
-            return NotFound($"Patient with id {id} not found");
+            return NoContent();
         }
         
         await _patientService.DeletePatientAsync(id);
@@ -158,7 +152,7 @@ public class PatientsController : ControllerBase
     public async Task<ActionResult<List<AppointmentDto>>> GetPatientAppointments(int id)
     {
         var existingPatient = await _patientService.GetPatientByIdAsync(id);
-        if (existingPatient == null) 
+        if (existingPatient == null)
         {
             return NotFound($"Patient with id {id} not found");
         }
@@ -175,7 +169,7 @@ public class PatientsController : ControllerBase
             PatientName = a.Patient?.FullName ?? string.Empty,
             DoctorName = a.Doctor?.FullName ?? string.Empty
         }).ToList();
-        
+
         return Ok(dtos);
     }
 }

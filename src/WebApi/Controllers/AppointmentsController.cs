@@ -9,21 +9,14 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class AppointmentsController : ControllerBase
+public class AppointmentsController(
+    IAppointmentService appointmentService,
+    IPatientService patientService,
+    IDoctorService doctorService) : ControllerBase
 {
-    private readonly IAppointmentService _appointmentService;
-    private readonly IPatientService _patientService;
-    private readonly IDoctorService _doctorService;
-
-    public AppointmentsController(
-        IAppointmentService appointmentService,
-        IPatientService patientService,
-        IDoctorService doctorService)
-    {
-        _appointmentService = appointmentService;
-        _patientService = patientService;
-        _doctorService = doctorService;
-    }
+    private readonly IAppointmentService _appointmentService = appointmentService;
+    private readonly IPatientService _patientService = patientService;
+    private readonly IDoctorService _doctorService = doctorService;
 
     [HttpGet]
     public async Task<ActionResult<List<AppointmentDto>>> GetAppointments()
@@ -40,7 +33,7 @@ public class AppointmentsController : ControllerBase
             PatientName = a.Patient?.FullName ?? string.Empty,
             DoctorName = a.Doctor?.FullName ?? string.Empty
         }).ToList();
-        
+
         return Ok(dtos);
     }
 
@@ -49,7 +42,7 @@ public class AppointmentsController : ControllerBase
     {
         var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
         if (appointment == null) return NotFound();
-        
+
         var dto = new AppointmentDto
         {
             Id = appointment.Id,
@@ -61,7 +54,7 @@ public class AppointmentsController : ControllerBase
             PatientName = appointment.Patient?.FullName ?? string.Empty,
             DoctorName = appointment.Doctor?.FullName ?? string.Empty
         };
-        
+
         return Ok(dto);
     }
 
@@ -71,7 +64,7 @@ public class AppointmentsController : ControllerBase
     {
         var patient = await _patientService.GetPatientByIdAsync(dto.PatientId);
         var doctor = await _doctorService.GetDoctorByIdAsync(dto.DoctorId);
-        
+
         if (patient == null || doctor == null)
         {
             return BadRequest("Patient or Doctor not found");
@@ -79,7 +72,6 @@ public class AppointmentsController : ControllerBase
 
         var appointment = new Appointment
         {
-            // Id не нужен - будет сгенерирован базой
             PatientId = dto.PatientId,
             Patient = patient,
             DoctorId = dto.DoctorId,
@@ -88,9 +80,9 @@ public class AppointmentsController : ControllerBase
             RoomNumber = dto.RoomNumber,
             IsFollowUp = dto.IsFollowUp
         };
-        
+
         var createdAppointment = await _appointmentService.CreateAppointmentAsync(appointment);
-        
+
         var resultDto = new AppointmentDto
         {
             Id = createdAppointment.Id,
@@ -102,33 +94,32 @@ public class AppointmentsController : ControllerBase
             PatientName = patient.FullName,
             DoctorName = doctor.FullName
         };
-        
+
         return CreatedAtAction(
-            nameof(GetAppointment), 
-            new { id = createdAppointment.Id }, 
+            nameof(GetAppointment),
+            new { id = createdAppointment.Id },
             resultDto);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAppointment(
-        int id, 
+        int id,
         [FromBody] AppointmentManipulationDto dto)
     {
         var existingAppointment = await _appointmentService.GetAppointmentByIdAsync(id);
-        if (existingAppointment == null) 
+        if (existingAppointment == null)
         {
             return NotFound($"Appointment with id {id} not found");
         }
 
         var patient = await _patientService.GetPatientByIdAsync(dto.PatientId);
         var doctor = await _doctorService.GetDoctorByIdAsync(dto.DoctorId);
-        
+
         if (patient == null || doctor == null)
         {
             return BadRequest("Patient or Doctor not found");
         }
 
-        // Обновляем существующий объект
         existingAppointment.PatientId = dto.PatientId;
         existingAppointment.Patient = patient;
         existingAppointment.DoctorId = dto.DoctorId;
@@ -136,10 +127,9 @@ public class AppointmentsController : ControllerBase
         existingAppointment.AppointmentDateTime = dto.AppointmentDateTime;
         existingAppointment.RoomNumber = dto.RoomNumber;
         existingAppointment.IsFollowUp = dto.IsFollowUp;
-        
-        // Теперь передаем оба параметра
+
         await _appointmentService.UpdateAppointmentAsync(id, existingAppointment);
-        
+
         return NoContent();
     }
 
@@ -147,13 +137,13 @@ public class AppointmentsController : ControllerBase
     public async Task<IActionResult> DeleteAppointment(int id)
     {
         var existingAppointment = await _appointmentService.GetAppointmentByIdAsync(id);
-        if (existingAppointment == null) 
+        if (existingAppointment == null)
         {
-            return NotFound($"Appointment with id {id} not found");
+            return NoContent();
         }
-        
+
         await _appointmentService.DeleteAppointmentAsync(id);
-        
+
         return NoContent();
     }
 }

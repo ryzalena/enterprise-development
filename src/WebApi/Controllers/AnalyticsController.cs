@@ -9,21 +9,14 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class AnalyticsController : ControllerBase
+public class AnalyticsController(
+    IDoctorService doctorService,
+    IPatientService patientService,
+    IAppointmentService appointmentService) : ControllerBase
 {
-    private readonly IDoctorService _doctorService;
-    private readonly IPatientService _patientService;
-    private readonly IAppointmentService _appointmentService;
-
-    public AnalyticsController(
-        IDoctorService doctorService,
-        IPatientService patientService,
-        IAppointmentService appointmentService)
-    {
-        _doctorService = doctorService;
-        _patientService = patientService;
-        _appointmentService = appointmentService;
-    }
+    private readonly IDoctorService _doctorService = doctorService;
+    private readonly IPatientService _patientService = patientService;
+    private readonly IAppointmentService _appointmentService = appointmentService;
 
     [HttpGet("doctors/experience/{minYears}")]
     public async Task<ActionResult<List<DoctorDto>>> GetDoctorsWithExperience(int minYears)
@@ -72,7 +65,7 @@ public class AnalyticsController : ControllerBase
     [HttpGet("patients/over-30-multiple-doctors")]
     public async Task<ActionResult<List<PatientDto>>> GetPatientsOver30WithMultipleDoctors()
     {
-        var patients = await _patientService.GetPatientsOverAgeAsync(30); // Используем существующий метод
+        var patients = await _patientService.GetPatientsOverAgeAsync(30);
         var dtos = patients.Select(p => new PatientDto
         {
             Id = p.Id,

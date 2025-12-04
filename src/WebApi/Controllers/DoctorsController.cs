@@ -3,27 +3,20 @@ using Domain.Interfaces;
 using Application.Dtos;
 using Domain.Entities;
 
-namespace WebAPI.Controllers;
+namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class DoctorsController : ControllerBase
+public class DoctorsController(
+    IDoctorService doctorService,
+    IAppointmentService appointmentService,
+    ISpecializationService specializationService) : ControllerBase
 {
-    private readonly IDoctorService _doctorService;
-    private readonly IAppointmentService _appointmentService;
-    private readonly ISpecializationService _specializationService;
-
-    public DoctorsController(
-        IDoctorService doctorService, 
-        IAppointmentService appointmentService,
-        ISpecializationService specializationService)
-    {
-        _doctorService = doctorService;
-        _appointmentService = appointmentService;
-        _specializationService = specializationService;
-    }
+    private readonly IDoctorService _doctorService = doctorService;
+    private readonly IAppointmentService _appointmentService = appointmentService;
+    private readonly ISpecializationService _specializationService = specializationService;
 
     [HttpGet]
     public async Task<ActionResult<List<DoctorDto>>> GetDoctors()
@@ -67,7 +60,6 @@ public class DoctorsController : ControllerBase
     public async Task<ActionResult<DoctorDto>> CreateDoctor(
         [FromBody] DoctorManipulationDto dto)
     {
-        // Проверяем существование специализации
         var specialization = await _specializationService.GetSpecializationByIdAsync(dto.SpecializationId);
         if (specialization == null)
         {
@@ -111,7 +103,6 @@ public class DoctorsController : ControllerBase
             return NotFound($"Doctor with id {id} not found");
         }
 
-        // Проверяем существование специализации
         var specialization = await _specializationService.GetSpecializationByIdAsync(dto.SpecializationId);
         if (specialization == null)
         {
@@ -135,7 +126,7 @@ public class DoctorsController : ControllerBase
         var existingDoctor = await _doctorService.GetDoctorByIdAsync(id);
         if (existingDoctor == null) 
         {
-            return NotFound($"Doctor with id {id} not found");
+            return NoContent();
         }
         
         await _doctorService.DeleteDoctorAsync(id);

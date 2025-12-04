@@ -9,14 +9,10 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class SpecializationsController : ControllerBase
+public class SpecializationsController(
+    ISpecializationService service) : ControllerBase
 {
-    private readonly ISpecializationService _service;
-
-    public SpecializationsController(ISpecializationService service)
-    {
-        _service = service;
-    }
+    private readonly ISpecializationService _service = service;
 
     [HttpGet]
     public async Task<ActionResult<List<SpecializationDto>>> GetSpecializations()
@@ -28,7 +24,7 @@ public class SpecializationsController : ControllerBase
             Name = s.Name,
             Description = s.Description ?? string.Empty
         }).ToList();
-        
+
         return Ok(dtos);
     }
 
@@ -36,18 +32,18 @@ public class SpecializationsController : ControllerBase
     public async Task<ActionResult<SpecializationDto>> GetSpecialization(int id)
     {
         var specialization = await _service.GetSpecializationByIdAsync(id);
-        if (specialization == null) 
+        if (specialization == null)
         {
             return NotFound($"Specialization with id {id} not found");
         }
-        
+
         var dto = new SpecializationDto
         {
             Id = specialization.Id,
             Name = specialization.Name,
             Description = specialization.Description ?? string.Empty
         };
-        
+
         return Ok(dto);
     }
 
@@ -57,40 +53,40 @@ public class SpecializationsController : ControllerBase
     {
         var specialization = new Specialization
         {
-            Id = 0, // Будет сгенерировано сервисом
+            Id = 0,
             Name = dto.Name,
             Description = dto.Description
         };
-        
+
         var created = await _service.CreateSpecializationAsync(specialization);
-        
+
         var resultDto = new SpecializationDto
         {
             Id = created.Id,
             Name = created.Name,
             Description = created.Description ?? string.Empty
         };
-        
+
         return CreatedAtAction(
-            nameof(GetSpecialization), 
-            new { id = created.Id }, 
+            nameof(GetSpecialization),
+            new { id = created.Id },
             resultDto);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSpecialization(
-        int id, 
+        int id,
         [FromBody] SpecializationManipulationDto dto)
     {
         var existingSpecialization = await _service.GetSpecializationByIdAsync(id);
-        if (existingSpecialization == null) 
+        if (existingSpecialization == null)
         {
             return NotFound($"Specialization with id {id} not found");
         }
 
         existingSpecialization.Name = dto.Name;
         existingSpecialization.Description = dto.Description;
-        
+
         await _service.UpdateSpecializationAsync(id, existingSpecialization);
         return NoContent();
     }
@@ -99,11 +95,11 @@ public class SpecializationsController : ControllerBase
     public async Task<IActionResult> DeleteSpecialization(int id)
     {
         var existingSpecialization = await _service.GetSpecializationByIdAsync(id);
-        if (existingSpecialization == null) 
+        if (existingSpecialization == null)
         {
-            return NotFound($"Specialization with id {id} not found");
+            return NoContent();
         }
-        
+
         await _service.DeleteSpecializationAsync(id);
         return NoContent();
     }
