@@ -8,79 +8,74 @@ public class PatientService : IPatientService
 {
     private readonly List<Patient> _patients;
     private readonly List<Appointment> _appointments;
+    private int _nextId;
 
     public PatientService()
     {
         _patients = TestData.Patients;
         _appointments = TestData.Appointments;
+        _nextId = _patients.Count > 0 ? _patients.Max(p => p.Id) + 1 : 1;
     }
 
     public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
     {
-        await Task.CompletedTask;
-        return _patients;
+        return await Task.FromResult(_patients);
     }
 
     public async Task<Patient?> GetPatientByIdAsync(int id)
     {
-        await Task.CompletedTask;
-        return _patients.FirstOrDefault(p => p.Id == id);
+        return await Task.FromResult(_patients.FirstOrDefault(p => p.Id == id));
     }
 
     public async Task<IEnumerable<Patient>> GetPatientsByDoctorAsync(int doctorId)
     {
-        await Task.CompletedTask;
-        
         var patientIds = _appointments
             .Where(a => a.DoctorId == doctorId)
             .Select(a => a.PatientId)
             .Distinct();
             
-        return _patients.Where(p => patientIds.Contains(p.Id));
+        return await Task.FromResult(_patients.Where(p => patientIds.Contains(p.Id)));
     }
 
     public async Task<IEnumerable<Patient>> GetPatientsOverAgeAsync(int age)
     {
-        await Task.CompletedTask;
-        
         var cutoffDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-age));
-        return _patients.Where(p => p.BirthDate <= cutoffDate);
+        return await Task.FromResult(_patients.Where(p => p.BirthDate <= cutoffDate));
     }
 
     public async Task<Patient> CreatePatientAsync(Patient patient)
     {
-        await Task.CompletedTask;
-        
-        var newId = _patients.Max(p => p.Id) + 1;
-        patient.Id = newId;
+        patient.Id = _nextId++;
         _patients.Add(patient);
         
-        return patient;
+        return await Task.FromResult(patient);
     }
 
     public async Task UpdatePatientAsync(int id, Patient patient)
     {
-        await Task.CompletedTask;
-        
-        var existingPatient = _patients.FirstOrDefault(p => p.Id == id);
-        if (existingPatient == null)
-            throw new ArgumentException("Patient not found");
+        var existingPatient = _patients.FirstOrDefault(p => p.Id == id) 
+            ?? throw new ArgumentException("Patient not found");
 
         existingPatient.PassportNumber = patient.PassportNumber;
         existingPatient.FullName = patient.FullName;
+        existingPatient.Gender = patient.Gender;
         existingPatient.BirthDate = patient.BirthDate;
         existingPatient.Address = patient.Address;
+        existingPatient.BloodGroup = patient.BloodGroup;
+        existingPatient.RhFactor = patient.RhFactor;
         existingPatient.PhoneNumber = patient.PhoneNumber;
+
+        await Task.CompletedTask;
     }
 
     public async Task DeletePatientAsync(int id)
     {
-        await Task.CompletedTask;
-        
         var patient = _patients.FirstOrDefault(p => p.Id == id);
         if (patient != null)
         {
             _patients.Remove(patient);
         }
+
+        await Task.CompletedTask;
     }
 }
