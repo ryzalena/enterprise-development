@@ -3,7 +3,7 @@ using Application.Services;
 using Application.Dtos;
 using Domain.Interfaces;
 
-namespace WebAPI.Controllers;
+namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

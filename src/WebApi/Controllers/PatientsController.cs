@@ -4,7 +4,7 @@ using Application.Dtos;
 using Domain.Entities;
 using Domain.Enums;
 
-namespace WebAPI.Controllers;
+namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
