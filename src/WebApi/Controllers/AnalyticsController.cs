@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Application.Services;
 using Application.Dtos;
 using Domain.Interfaces;
 
@@ -14,14 +13,10 @@ public class AnalyticsController(
     IPatientService patientService,
     IAppointmentService appointmentService) : ControllerBase
 {
-    private readonly IDoctorService _doctorService = doctorService;
-    private readonly IPatientService _patientService = patientService;
-    private readonly IAppointmentService _appointmentService = appointmentService;
-
     [HttpGet("doctors/experience/{minYears}")]
     public async Task<ActionResult<List<DoctorDto>>> GetDoctorsWithExperience(int minYears)
     {
-        var doctors = await _doctorService.GetDoctorsWithExperienceAsync(minYears);
+        var doctors = await doctorService.GetDoctorsWithExperienceAsync(minYears);
         var dtos = doctors.Select(d => new DoctorDto
         {
             Id = d.Id,
@@ -38,7 +33,7 @@ public class AnalyticsController(
     [HttpGet("doctors/{doctorId}/patients")]
     public async Task<ActionResult<List<PatientDto>>> GetPatientsByDoctor(int doctorId)
     {
-        var patients = await _patientService.GetPatientsByDoctorAsync(doctorId);
+        var patients = await patientService.GetPatientsByDoctorAsync(doctorId);
         var dtos = patients.Select(p => new PatientDto
         {
             Id = p.Id,
@@ -58,14 +53,14 @@ public class AnalyticsController(
     [HttpGet("appointments/follow-up/last-month")]
     public async Task<ActionResult<int>> GetFollowUpAppointmentsCountLastMonth()
     {
-        var count = await _appointmentService.GetFollowUpCountLastMonthAsync();
+        var count = await appointmentService.GetFollowUpCountLastMonthAsync();
         return Ok(new { count });
     }
 
     [HttpGet("patients/over-30-multiple-doctors")]
     public async Task<ActionResult<List<PatientDto>>> GetPatientsOver30WithMultipleDoctors()
     {
-        var patients = await _patientService.GetPatientsOverAgeAsync(30);
+        var patients = await patientService.GetPatientsOverAgeAsync(30);
         var dtos = patients.Select(p => new PatientDto
         {
             Id = p.Id,
@@ -85,7 +80,7 @@ public class AnalyticsController(
     [HttpGet("appointments/room/{roomNumber}/current-month")]
     public async Task<ActionResult<List<AppointmentDto>>> GetAppointmentsInRoomForCurrentMonth(string roomNumber)
     {
-        var appointments = await _appointmentService.GetAppointmentsByRoomAndDateAsync(roomNumber, DateTime.Now);
+        var appointments = await appointmentService.GetAppointmentsByRoomAndDateAsync(roomNumber, DateTime.Now);
         var dtos = appointments.Select(a => new AppointmentDto
         {
             Id = a.Id,
@@ -94,8 +89,27 @@ public class AnalyticsController(
             AppointmentDateTime = a.AppointmentDateTime,
             RoomNumber = a.RoomNumber,
             IsFollowUp = a.IsFollowUp,
-            PatientName = a.Patient?.FullName ?? string.Empty,
-            DoctorName = a.Doctor?.FullName ?? string.Empty
+            Patient = a.Patient != null ? new PatientDto
+            {
+                Id = a.Patient.Id,
+                PassportNumber = a.Patient.PassportNumber,
+                FullName = a.Patient.FullName,
+                Gender = a.Patient.Gender.ToString(),
+                BirthDate = a.Patient.BirthDate,
+                Address = a.Patient.Address,
+                BloodGroup = a.Patient.BloodGroup.ToString(),
+                RhFactor = a.Patient.RhFactor.ToString(),
+                PhoneNumber = a.Patient.PhoneNumber
+            } : null,
+            Doctor = a.Doctor != null ? new DoctorDto
+            {
+                Id = a.Doctor.Id,
+                PassportNumber = a.Doctor.PassportNumber,
+                FullName = a.Doctor.FullName,
+                BirthYear = a.Doctor.BirthYear,
+                SpecializationName = a.Doctor.Specialization?.Name ?? string.Empty,
+                ExperienceYears = a.Doctor.ExperienceYears
+            } : null
         }).ToList();
         
         return Ok(dtos);

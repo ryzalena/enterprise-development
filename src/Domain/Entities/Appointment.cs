@@ -13,22 +13,22 @@ public class Appointment
     /// <summary>
     /// Идентификатор пациента
     /// </summary>
-    public required int PatientId { get; set; }
+    public int PatientId { get; set; }
     
     /// <summary>
     /// Пациент, записанный на прием
     /// </summary>
-    public Patient? Patient { get; set; }
+    public Patient Patient { get; set; } = null!;
     
     /// <summary>
     /// Идентификатор врача
     /// </summary>
-    public required int DoctorId { get; set; }
+    public int DoctorId { get; set; }
     
     /// <summary>
     /// Врач, к которому записан пациент
     /// </summary>
-    public Doctor? Doctor { get; set; }
+    public Doctor Doctor { get; set; } = null!;
     
     /// <summary>
     /// Дата и время приема

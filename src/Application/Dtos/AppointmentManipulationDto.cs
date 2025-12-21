@@ -23,7 +23,7 @@ public class AppointmentManipulationDto
     /// <summary>
     /// Номер кабинета
     /// </summary>
-    public string RoomNumber { get; set; } = string.Empty;
+    public string? RoomNumber { get; set; }
     
     /// <summary>
     /// Признак повторного приема (follow-up)

@@ -14,14 +14,10 @@ public class AppointmentsController(
     IPatientService patientService,
     IDoctorService doctorService) : ControllerBase
 {
-    private readonly IAppointmentService _appointmentService = appointmentService;
-    private readonly IPatientService _patientService = patientService;
-    private readonly IDoctorService _doctorService = doctorService;
-
     [HttpGet]
     public async Task<ActionResult<List<AppointmentDto>>> GetAppointments()
     {
-        var appointments = await _appointmentService.GetAllAppointmentsAsync();
+        var appointments = await appointmentService.GetAllAppointmentsAsync();
         var dtos = appointments.Select(a => new AppointmentDto
         {
             Id = a.Id,
@@ -30,8 +26,27 @@ public class AppointmentsController(
             AppointmentDateTime = a.AppointmentDateTime,
             RoomNumber = a.RoomNumber,
             IsFollowUp = a.IsFollowUp,
-            PatientName = a.Patient?.FullName ?? string.Empty,
-            DoctorName = a.Doctor?.FullName ?? string.Empty
+            Patient = a.Patient != null ? new PatientDto
+            {
+                Id = a.Patient.Id,
+                PassportNumber = a.Patient.PassportNumber,
+                FullName = a.Patient.FullName,
+                Gender = a.Patient.Gender.ToString(),
+                BirthDate = a.Patient.BirthDate,
+                Address = a.Patient.Address,
+                BloodGroup = a.Patient.BloodGroup.ToString(),
+                RhFactor = a.Patient.RhFactor.ToString(),
+                PhoneNumber = a.Patient.PhoneNumber
+            } : null,
+            Doctor = a.Doctor != null ? new DoctorDto
+            {
+                Id = a.Doctor.Id,
+                PassportNumber = a.Doctor.PassportNumber,
+                FullName = a.Doctor.FullName,
+                BirthYear = a.Doctor.BirthYear,
+                SpecializationName = a.Doctor.Specialization?.Name ?? string.Empty,
+                ExperienceYears = a.Doctor.ExperienceYears
+            } : null
         }).ToList();
 
         return Ok(dtos);
@@ -40,7 +55,7 @@ public class AppointmentsController(
     [HttpGet("{id}")]
     public async Task<ActionResult<AppointmentDto>> GetAppointment(int id)
     {
-        var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
+        var appointment = await appointmentService.GetAppointmentByIdAsync(id);
         if (appointment == null) return NotFound();
 
         var dto = new AppointmentDto
@@ -51,8 +66,27 @@ public class AppointmentsController(
             AppointmentDateTime = appointment.AppointmentDateTime,
             RoomNumber = appointment.RoomNumber,
             IsFollowUp = appointment.IsFollowUp,
-            PatientName = appointment.Patient?.FullName ?? string.Empty,
-            DoctorName = appointment.Doctor?.FullName ?? string.Empty
+            Patient = appointment.Patient != null ? new PatientDto
+            {
+                Id = appointment.Patient.Id,
+                PassportNumber = appointment.Patient.PassportNumber,
+                FullName = appointment.Patient.FullName,
+                Gender = appointment.Patient.Gender.ToString(),
+                BirthDate = appointment.Patient.BirthDate,
+                Address = appointment.Patient.Address,
+                BloodGroup = appointment.Patient.BloodGroup.ToString(),
+                RhFactor = appointment.Patient.RhFactor.ToString(),
+                PhoneNumber = appointment.Patient.PhoneNumber
+            } : null,
+            Doctor = appointment.Doctor != null ? new DoctorDto
+            {
+                Id = appointment.Doctor.Id,
+                PassportNumber = appointment.Doctor.PassportNumber,
+                FullName = appointment.Doctor.FullName,
+                BirthYear = appointment.Doctor.BirthYear,
+                SpecializationName = appointment.Doctor.Specialization?.Name ?? string.Empty,
+                ExperienceYears = appointment.Doctor.ExperienceYears
+            } : null
         };
 
         return Ok(dto);
@@ -62,8 +96,8 @@ public class AppointmentsController(
     public async Task<ActionResult<AppointmentDto>> CreateAppointment(
         [FromBody] AppointmentManipulationDto dto)
     {
-        var patient = await _patientService.GetPatientByIdAsync(dto.PatientId);
-        var doctor = await _doctorService.GetDoctorByIdAsync(dto.DoctorId);
+        var patient = await patientService.GetPatientByIdAsync(dto.PatientId);
+        var doctor = await doctorService.GetDoctorByIdAsync(dto.DoctorId);
 
         if (patient == null || doctor == null)
         {
@@ -81,7 +115,7 @@ public class AppointmentsController(
             IsFollowUp = dto.IsFollowUp
         };
 
-        var createdAppointment = await _appointmentService.CreateAppointmentAsync(appointment);
+        var createdAppointment = await appointmentService.CreateAppointmentAsync(appointment);
 
         var resultDto = new AppointmentDto
         {
@@ -91,8 +125,27 @@ public class AppointmentsController(
             AppointmentDateTime = createdAppointment.AppointmentDateTime,
             RoomNumber = createdAppointment.RoomNumber,
             IsFollowUp = createdAppointment.IsFollowUp,
-            PatientName = patient.FullName,
-            DoctorName = doctor.FullName
+            Patient = patient != null ? new PatientDto
+            {
+                Id = patient.Id,
+                PassportNumber = patient.PassportNumber,
+                FullName = patient.FullName,
+                Gender = patient.Gender.ToString(),
+                BirthDate = patient.BirthDate,
+                Address = patient.Address,
+                BloodGroup = patient.BloodGroup.ToString(),
+                RhFactor = patient.RhFactor.ToString(),
+                PhoneNumber = patient.PhoneNumber
+            } : null,
+            Doctor = doctor != null ? new DoctorDto
+            {
+                Id = doctor.Id,
+                PassportNumber = doctor.PassportNumber,
+                FullName = doctor.FullName,
+                BirthYear = doctor.BirthYear,
+                SpecializationName = doctor.Specialization?.Name ?? string.Empty,
+                ExperienceYears = doctor.ExperienceYears
+            } : null
         };
 
         return CreatedAtAction(
@@ -106,14 +159,14 @@ public class AppointmentsController(
         int id,
         [FromBody] AppointmentManipulationDto dto)
     {
-        var existingAppointment = await _appointmentService.GetAppointmentByIdAsync(id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdAsync(id);
         if (existingAppointment == null)
         {
             return NotFound($"Appointment with id {id} not found");
         }
 
-        var patient = await _patientService.GetPatientByIdAsync(dto.PatientId);
-        var doctor = await _doctorService.GetDoctorByIdAsync(dto.DoctorId);
+        var patient = await patientService.GetPatientByIdAsync(dto.PatientId);
+        var doctor = await doctorService.GetDoctorByIdAsync(dto.DoctorId);
 
         if (patient == null || doctor == null)
         {
@@ -128,7 +181,7 @@ public class AppointmentsController(
         existingAppointment.RoomNumber = dto.RoomNumber;
         existingAppointment.IsFollowUp = dto.IsFollowUp;
 
-        await _appointmentService.UpdateAppointmentAsync(id, existingAppointment);
+        await appointmentService.UpdateAppointmentAsync(id, existingAppointment);
 
         return NoContent();
     }
@@ -136,13 +189,13 @@ public class AppointmentsController(
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAppointment(int id)
     {
-        var existingAppointment = await _appointmentService.GetAppointmentByIdAsync(id);
+        var existingAppointment = await appointmentService.GetAppointmentByIdAsync(id);
         if (existingAppointment == null)
         {
             return NoContent();
         }
 
-        await _appointmentService.DeleteAppointmentAsync(id);
+        await appointmentService.DeleteAppointmentAsync(id);
 
         return NoContent();
     }
