@@ -8,7 +8,7 @@ public class Specialization
     /// <summary>
     /// Уникальный идентификатор специализации
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
     
     /// <summary>
     /// Название специализации

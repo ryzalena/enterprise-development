@@ -22,7 +22,7 @@ public static class TestData
             BirthDate = new DateOnly(1980, 5, 15), 
             Address = "ул. Ленина, д. 1", 
             BloodGroup = BloodGroup.A, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (915) 111-2233" 
         },
         new Patient 
@@ -34,7 +34,7 @@ public static class TestData
             BirthDate = new DateOnly(1975, 8, 20), 
             Address = "ул. Мира, д. 25", 
             BloodGroup = BloodGroup.B, 
-            RhFactor = RhFactor.Negative, 
+            RhFactor = RhFactor.Neg, 
             PhoneNumber = "+7 (916) 222-3344" 
         },
         new Patient 
@@ -46,7 +46,7 @@ public static class TestData
             BirthDate = new DateOnly(1990, 3, 10), 
             Address = "ул. Советская, д. 15", 
             BloodGroup = BloodGroup.O, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (917) 333-4455" 
         },
         new Patient 
@@ -58,7 +58,7 @@ public static class TestData
             BirthDate = new DateOnly(1985, 12, 5), 
             Address = "ул. Центральная, д. 8", 
             BloodGroup = BloodGroup.Ab, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (918) 444-5566" 
         },
         new Patient 
@@ -70,7 +70,7 @@ public static class TestData
             BirthDate = new DateOnly(1970, 7, 30), 
             Address = "ул. Школьная, д. 12", 
             BloodGroup = BloodGroup.A, 
-            RhFactor = RhFactor.Negative, 
+            RhFactor = RhFactor.Neg, 
             PhoneNumber = "+7 (919) 555-6677" 
         },
         new Patient 
@@ -82,7 +82,7 @@ public static class TestData
             BirthDate = new DateOnly(1988, 2, 14), 
             Address = "ул. Парковая, д. 7", 
             BloodGroup = BloodGroup.B, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (920) 666-7788" 
         },
         new Patient 
@@ -94,7 +94,7 @@ public static class TestData
             BirthDate = new DateOnly(1978, 11, 8), 
             Address = "ул. Лесная, д. 18", 
             BloodGroup = BloodGroup.O, 
-            RhFactor = RhFactor.Negative, 
+            RhFactor = RhFactor.Neg, 
             PhoneNumber = "+7 (921) 777-8899" 
         },
         new Patient 
@@ -106,7 +106,7 @@ public static class TestData
             BirthDate = new DateOnly(1992, 6, 12), 
             Address = "ул. Новая, д. 22", 
             BloodGroup = BloodGroup.Ab, 
-            RhFactor = RhFactor.Negative, 
+            RhFactor = RhFactor.Neg, 
             PhoneNumber = "+7 (922) 888-9900" 
         },
         new Patient 
@@ -118,7 +118,7 @@ public static class TestData
             BirthDate = new DateOnly(1983, 4, 17), 
             Address = "ул. Заречная, д. 9", 
             BloodGroup = BloodGroup.A, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (923) 999-0011" 
         },
         new Patient 
@@ -130,7 +130,7 @@ public static class TestData
             BirthDate = new DateOnly(1973, 9, 25), 
             Address = "ул. Солнечная, д. 14", 
             BloodGroup = BloodGroup.B, 
-            RhFactor = RhFactor.Positive, 
+            RhFactor = RhFactor.Pos, 
             PhoneNumber = "+7 (924) 000-1122" 
         }
     ];

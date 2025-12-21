@@ -8,10 +8,10 @@ public enum RhFactor
     /// <summary>
     /// Положительный резус-фактор
     /// </summary>
-    Positive,
+    Pos,
     
     /// <summary>
     /// Отрицательный резус-фактор
     /// </summary>
-    Negative
+    Neg
 }

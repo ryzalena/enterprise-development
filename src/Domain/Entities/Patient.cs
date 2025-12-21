@@ -10,7 +10,7 @@ public class Patient
     /// <summary>
     /// Уникальный идентификатор пациента
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
     
     /// <summary>
     /// Номер паспорта пациента

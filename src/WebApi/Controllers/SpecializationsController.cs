@@ -12,12 +12,10 @@ namespace WebApi.Controllers;
 public class SpecializationsController(
     ISpecializationService service) : ControllerBase
 {
-    private readonly ISpecializationService _service = service;
-
     [HttpGet]
     public async Task<ActionResult<List<SpecializationDto>>> GetSpecializations()
     {
-        var specializations = await _service.GetAllSpecializationsAsync();
+        var specializations = await service.GetAllSpecializationsAsync();
         var dtos = specializations.Select(s => new SpecializationDto
         {
             Id = s.Id,
@@ -31,7 +29,7 @@ public class SpecializationsController(
     [HttpGet("{id}")]
     public async Task<ActionResult<SpecializationDto>> GetSpecialization(int id)
     {
-        var specialization = await _service.GetSpecializationByIdAsync(id);
+        var specialization = await service.GetSpecializationByIdAsync(id);
         if (specialization == null)
         {
             return NotFound($"Specialization with id {id} not found");
@@ -58,7 +56,7 @@ public class SpecializationsController(
             Description = dto.Description
         };
 
-        var created = await _service.CreateSpecializationAsync(specialization);
+        var created = await service.CreateSpecializationAsync(specialization);
 
         var resultDto = new SpecializationDto
         {
@@ -78,7 +76,7 @@ public class SpecializationsController(
         int id,
         [FromBody] SpecializationManipulationDto dto)
     {
-        var existingSpecialization = await _service.GetSpecializationByIdAsync(id);
+        var existingSpecialization = await service.GetSpecializationByIdAsync(id);
         if (existingSpecialization == null)
         {
             return NotFound($"Specialization with id {id} not found");
@@ -87,20 +85,20 @@ public class SpecializationsController(
         existingSpecialization.Name = dto.Name;
         existingSpecialization.Description = dto.Description;
 
-        await _service.UpdateSpecializationAsync(id, existingSpecialization);
+        await service.UpdateSpecializationAsync(id, existingSpecialization);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSpecialization(int id)
     {
-        var existingSpecialization = await _service.GetSpecializationByIdAsync(id);
+        var existingSpecialization = await service.GetSpecializationByIdAsync(id);
         if (existingSpecialization == null)
         {
             return NoContent();
         }
 
-        await _service.DeleteSpecializationAsync(id);
+        await service.DeleteSpecializationAsync(id);
         return NoContent();
     }
 }
