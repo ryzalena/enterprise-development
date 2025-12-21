@@ -28,12 +28,12 @@ public class Doctor
     /// <summary>
     /// Идентификатор специализации врача
     /// </summary>
-    public required int SpecializationId { get; set; }
+    public int SpecializationId { get; set; }
     
     /// <summary>
     /// Специализация врача
     /// </summary>
-    public required Specialization Specialization { get; set; }
+    public Specialization Specialization { get; set; } = null!;
     
     /// <summary>
     /// Стаж работы врача (в годах)
@@ -44,5 +44,4 @@ public class Doctor
     /// Записи на прием к врачу
     /// </summary>
     public ICollection<Appointment> Appointments { get; set; } = [];
-
 }
