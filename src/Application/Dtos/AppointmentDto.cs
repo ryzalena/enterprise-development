@@ -18,7 +18,7 @@ public class AppointmentDto
     /// <summary>
     /// Имя пациента
     /// </summary>
-    public string PatientName { get; set; } = string.Empty;
+    public PatientDto? Patient { get; set; }
     
     /// <summary>
     /// Идентификатор врача
@@ -28,7 +28,7 @@ public class AppointmentDto
     /// <summary>
     /// Имя врача
     /// </summary>
-    public string DoctorName { get; set; } = string.Empty;
+    public DoctorDto? Doctor { get; set; }
     
     /// <summary>
     /// Дата и время приема
@@ -38,7 +38,7 @@ public class AppointmentDto
     /// <summary>
     /// Номер кабинета
     /// </summary>
-    public string RoomNumber { get; set; } = string.Empty;
+    public string? RoomNumber { get; set; }
     
     /// <summary>
     /// Признак повторного приема (follow-up)
