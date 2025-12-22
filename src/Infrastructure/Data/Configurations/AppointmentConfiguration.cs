@@ -16,10 +16,11 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 
         builder.Property(a => a.AppointmentDateTime)
             .IsRequired();
-        
+
+        // Используйте HasDefaultValue — он полностью поддерживается в EF Core 8
         builder.Property(a => a.IsFollowUp)
             .IsRequired()
-            .HasDefaultValueSql("0"); 
+            .HasDefaultValue(false);
 
         builder.HasOne(a => a.Patient)
             .WithMany()
