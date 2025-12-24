@@ -1,125 +1,131 @@
-﻿using DataGenerator.Models;
+﻿using System.Text.Json;
+using Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NATS.Client.Core;
 using Polly;
-using System.Text.Json;
 
-namespace DataGenerator.Services
+namespace DataGenerator.Services;
+
+public interface INatsService
 {
-    public interface INatsService
+    Task ConnectAsync(CancellationToken cancellationToken);
+    Task<bool> PublishContractAsync(AppointmentCreated appointment, CancellationToken cancellationToken); // Изменено
+    Task DisconnectAsync();
+    bool IsConnected { get; }
+}
+
+public class NatsConfig
+{
+    public string Url { get; set; } = "nats://localhost:4222";
+    public string Subject { get; set; } = "appointments.created";
+    public int RetryCount { get; set; } = 3;
+    public int RetryDelayMs { get; set; } = 1000;
+    public int TimeoutSeconds { get; set; } = 5;
+}
+
+public class NatsService : INatsService, IAsyncDisposable
+{
+    private readonly NatsConfig _config;
+    private readonly ILogger<NatsService> _logger;
+    private readonly ResiliencePipeline _resiliencePipeline;
+    private INatsConnection? _connection;
+
+    public bool IsConnected => _connection != null;
+
+    public NatsService(
+        IOptions<NatsConfig> config,
+        ILogger<NatsService> logger)
     {
-        Task ConnectAsync(CancellationToken cancellationToken);
-        Task<bool> PublishContractAsync(ContractMessage contract, CancellationToken cancellationToken);
-        Task DisconnectAsync();
-        bool IsConnected { get; }
+        _config = config.Value;
+        _logger = logger;
+        
+        _resiliencePipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new Polly.Retry.RetryStrategyOptions
+            {
+                MaxRetryAttempts = _config.RetryCount,
+                Delay = TimeSpan.FromMilliseconds(_config.RetryDelayMs),
+                BackoffType = DelayBackoffType.Exponential,
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Retry attempt {Attempt} for NATS. Delay: {Delay}ms", 
+                        args.AttemptNumber, args.RetryDelay.TotalMilliseconds);
+                    return default;
+                }
+            })
+            .Build();
     }
 
-    public class NatsService : INatsService, IAsyncDisposable
+    public async Task ConnectAsync(CancellationToken cancellationToken)
     {
-        private readonly NatsConfig _config;
-        private readonly ILogger<NatsService> _logger;
-        private readonly ResiliencePipeline _resiliencePipeline;
-        private INatsConnection? _connection;
+        if (IsConnected)
+            return;
 
-        // Исправлено: проверка состояния соединения
-        public bool IsConnected => _connection != null;
-
-        public NatsService(
-            IOptions<NatsConfig> config,
-            ILogger<NatsService> logger)
+        await _resiliencePipeline.ExecuteAsync(async token =>
         {
-            _config = config.Value;
-            _logger = logger;
-            
-            _resiliencePipeline = new ResiliencePipelineBuilder()
-                .AddRetry(new Polly.Retry.RetryStrategyOptions
-                {
-                    MaxRetryAttempts = _config.RetryCount,
-                    Delay = TimeSpan.FromMilliseconds(_config.RetryDelayMs),
-                    BackoffType = DelayBackoffType.Exponential,
-                    OnRetry = args =>
-                    {
-                        _logger.LogWarning("Retry attempt {Attempt} for NATS. Delay: {Delay}ms", 
-                            args.AttemptNumber, args.RetryDelay.TotalMilliseconds);
-                        return default;
-                    }
-                })
-                .Build();
-        }
-
-        public async Task ConnectAsync(CancellationToken cancellationToken)
-        {
-            if (IsConnected)
-                return;
-
-            await _resiliencePipeline.ExecuteAsync(async token =>
+            try
             {
-                try
+                _logger.LogInformation("Connecting to NATS at {Url}", _config.Url);
+                
+                var options = NatsOpts.Default with
                 {
-                    _logger.LogInformation("Connecting to NATS at {Url}", _config.Url);
-                    
-                    var options = NatsOpts.Default with
-                    {
-                        Url = _config.Url,
-                        Name = $"Generator-{Guid.NewGuid():N}",
-                        ConnectTimeout = TimeSpan.FromSeconds(_config.TimeoutSeconds)
-                    };
+                    Url = _config.Url,
+                    Name = $"Generator-{Guid.NewGuid():N}",
+                    ConnectTimeout = TimeSpan.FromSeconds(_config.TimeoutSeconds)
+                };
 
-                    _connection = new NatsConnection(options);
-                    
-                    // Простая проверка подключения - отправка ping
-                    await _connection.PingAsync(token);
-                    
-                    _logger.LogInformation("Connected to NATS successfully");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to connect to NATS");
-                    throw;
-                }
-            }, cancellationToken);
-        }
-
-        public async Task<bool> PublishContractAsync(ContractMessage contract, CancellationToken cancellationToken)
-        {
-            if (!IsConnected || _connection == null)
-            {
-                _logger.LogWarning("NATS not connected. Attempting to reconnect...");
-                await ConnectAsync(cancellationToken);
+                _connection = new NatsConnection(options);
+                
+                await _connection.PingAsync(token);
+                
+                _logger.LogInformation("Connected to NATS successfully");
             }
-
-            return await _resiliencePipeline.ExecuteAsync(async token =>
+            catch (Exception ex)
             {
-                try
-                {
-                    var json = JsonSerializer.Serialize(contract);
-                    await _connection!.PublishAsync(_config.Subject, json, cancellationToken: token);
-                    
-                    _logger.LogDebug("Published contract {ContractId} to NATS", contract.Id);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to publish contract {ContractId}", contract.Id);
-                    return false;
-                }
-            }, cancellationToken);
-        }
-
-        public async Task DisconnectAsync()
-        {
-            if (_connection != null)
-            {
-                await _connection.DisposeAsync();
-                _connection = null;
-                _logger.LogInformation("Disconnected from NATS");
+                _logger.LogError(ex, "Failed to connect to NATS");
+                throw;
             }
+        }, cancellationToken);
+    }
+
+    public async Task<bool> PublishContractAsync(AppointmentCreated appointment, CancellationToken cancellationToken)
+    {
+        if (!IsConnected || _connection == null)
+        {
+            _logger.LogWarning("NATS not connected. Attempting to reconnect...");
+            await ConnectAsync(cancellationToken);
         }
 
-        public async ValueTask DisposeAsync()
+        return await _resiliencePipeline.ExecuteAsync(async token =>
         {
-            await DisconnectAsync();
+            try
+            {
+                var json = JsonSerializer.Serialize(appointment);
+                await _connection!.PublishAsync(_config.Subject, json, cancellationToken: token);
+                
+                _logger.LogDebug("Published appointment {AppointmentId} to NATS", appointment.Id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to publish appointment {AppointmentId}", appointment.Id);
+                return false;
+            }
+        }, cancellationToken);
+    }
+
+    public async Task DisconnectAsync()
+    {
+        if (_connection != null)
+        {
+            await _connection.DisposeAsync();
+            _connection = null;
+            _logger.LogInformation("Disconnected from NATS");
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisconnectAsync();
     }
 }

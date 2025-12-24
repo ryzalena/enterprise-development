@@ -9,12 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.5.0" />
-        <PackageReference Include="Google.Protobuf" Version="3.27.0" />
         <PackageReference Include="Grpc.Net.Client" Version="2.66.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.66.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="NATS.Net" Version="2.5.0" />
         <PackageReference Include="NATS.Client" Version="0.14.5" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />

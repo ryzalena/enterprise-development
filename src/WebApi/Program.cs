@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Infrastructure.Data;
+using Domain.Interfaces;
+using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,53 +14,36 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// Настройка Kestrel для gRPC
-builder.WebHost.ConfigureKestrel(options =>
-{
-    // Порт для gRPC (HTTP/2)
-    options.ListenAnyIP(5189, listenOptions =>
-    {
-        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
-    });
-    
-    // Порт для HTTP/1.1 (для Swagger и health checks)
-    options.ListenAnyIP(5190, listenOptions =>
-    {
-        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
-    });
-});
-
 // Регистрация сервисов
 var services = builder.Services;
 
-// Добавьте контроллеры
 services.AddControllers();
 
 // База данных
-var connectionString = builder.Configuration.GetConnectionString("clinicdb") 
-    ?? "Server=localhost,1433;Database=clinicdb;User Id=sa;Password=MySecurePassword123!;TrustServerCertificate=True;";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Server=localhost,1433;Database=PolyclinicDB;User Id=sa;Password=MySecurePassword123!;TrustServerCertificate=True;";
 
-services.AddDbContext<DbContext>(options =>
+// РЕГИСТРАЦИЯ DbContext
+services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
 });
 
-// Регистрация NATS сервиса
-services.AddHostedService<SimpleNatsService>();
+services.AddScoped<IPatientRepository, PatientRepository>();
+services.AddScoped<IDoctorRepository, DoctorRepository>();
+services.AddScoped<ISpecializationRepository, SpecializationRepository>();
+services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
-// Если у вас есть GrpcContractService - зарегистрируйте его
-services.AddSingleton<GrpcContractService>();
+services.AddHostedService<NatsBackgroundService>();
 
-// CORS
 services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyHeader()
-              .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+              .AllowAnyHeader();
     });
 });
 
@@ -67,7 +53,6 @@ services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Конфигурация middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -79,10 +64,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseRouting();
 
-// Endpoints
 app.MapControllers();
 
-// Health checks
 app.MapGet("/", () => "Polyclinic Web API is running.");
 app.MapGet("/health", () => Results.Ok(new 
 { 
@@ -90,46 +73,73 @@ app.MapGet("/health", () => Results.Ok(new
     Timestamp = DateTime.UtcNow 
 }));
 
-// Информация о сервисе
-app.MapGet("/info", () =>
+app.MapGet("/health/nats", async (IServiceProvider services) =>
+{
+    try
+    {
+        using var scope = services.CreateScope();
+        var natsService = scope.ServiceProvider.GetService<NatsBackgroundService>();
+        return Results.Ok(new { 
+            Status = "NATS Consumer Running",
+            ServiceType = natsService?.GetType().Name ?? "Not registered"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"NATS check failed: {ex.Message}");
+    }
+});
+
+app.MapGet("/info", (IConfiguration configuration) =>
 {
     return Results.Ok(new
     {
-        Service = "Polyclinic Contract Service",
+        Service = "Polyclinic API",
         Version = "1.0.0",
         Environment = app.Environment.EnvironmentName,
         Features = new
         {
             NATS = true,
-            Database = "SQL Server"
+            Database = "SQL Server",
+            EntityFramework = "Enabled",
+            Swagger = true
         },
-        Endpoints = new
+        Configuration = new
         {
-            REST = "http://localhost:5190",
-            Health = "http://localhost:5190/health",
-            API = "http://localhost:5190/api/contracts"
+            NATS_Url = configuration["NATS:Url"],
+            NATS_Subject = configuration["NATS:Subject"],
+            Database = configuration.GetConnectionString("DefaultConnection")?.Split(';')[1]
         }
     });
 });
 
-// Проверка подключения к БД при старте
 try
 {
     app.Logger.LogInformation("Starting Polyclinic Web API...");
     app.Logger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
-    app.Logger.LogInformation("REST endpoint: http://*:5190");
     
-    // Проверяем подключение к БД
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     
     if (await dbContext.Database.CanConnectAsync())
     {
         app.Logger.LogInformation("Database connection successful");
+        
+        var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any())
+        {
+            app.Logger.LogInformation("Applying database migrations...");
+            await dbContext.Database.MigrateAsync();
+            app.Logger.LogInformation("Migrations applied successfully");
+        }
+        else
+        {
+            app.Logger.LogInformation("Database is up to date");
+        }
     }
     else
     {
-        app.Logger.LogWarning("Cannot connect to database");
+        app.Logger.LogError("Cannot connect to database");
     }
     
     app.Run();

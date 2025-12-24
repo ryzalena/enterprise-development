@@ -1,5 +1,4 @@
-﻿using DataGenerator.Models;
-using DataGenerator.Services;
+﻿using DataGenerator.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,24 +12,17 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices((context, services) =>
     {
-        var configuration = context.Configuration;
+        services.Configure<NatsConfig>(context.Configuration.GetSection("NATS"));
         
-        // Регистрация конфигураций
-        services.Configure<GeneratorConfig>(configuration.GetSection("Generator"));
-        services.Configure<GrpcConfig>(configuration.GetSection("Grpc"));
-        services.Configure<NatsConfig>(configuration.GetSection("Nats"));
-        
-        // Регистрация сервисов
-        services.AddSingleton<IContractGenerator, ContractGenerator>();
         services.AddSingleton<INatsService, NatsService>();
-        services.AddSingleton<IGrpcService, GrpcService>();
-        services.AddHostedService<ContractGenerationWorker>();
+        services.AddHostedService<ContractGeneratorService>();
         
-        // Настройка логирования
-        services.AddLogging(builder =>
+        services.AddLogging(configure => 
         {
-            builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Information);
+            configure.ClearProviders();
+            configure.AddConsole();
+            configure.AddDebug();
+            configure.SetMinimumLevel(LogLevel.Information);
         });
     })
     .Build();

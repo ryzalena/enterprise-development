@@ -66,10 +66,9 @@ public class ApplicationDbContext : DbContext
                 .HasConversion<string>()
                 .HasMaxLength(5);
                 
-            // Дата рождения
+            // Дата рождения 
             entity.Property(p => p.BirthDate)
-                .IsRequired()
-                .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+                .IsRequired();
         });
 
         // Конфигурация Specialization
@@ -155,24 +154,5 @@ public class ApplicationDbContext : DbContext
             entity.Property(a => a.IsFollowUp)
                 .IsRequired();
         });
-    }
-
-    // Конвертер для DateOnly (если используете EF Core 7+)
-    public class DateOnlyConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateOnly, DateTime>
-    {
-        public DateOnlyConverter() 
-            : base(dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue),
-                   dateTime => DateOnly.FromDateTime(dateTime))
-        {
-        }
-    }
-
-    public class DateOnlyComparer : Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<DateOnly>
-    {
-        public DateOnlyComparer() 
-            : base((d1, d2) => d1 == d2 && d1.DayNumber == d2.DayNumber,
-                   d => d.GetHashCode())
-        {
-        }
     }
 }
