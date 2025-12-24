@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
 
 // Конфигурация
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -52,6 +53,7 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseServiceDefaults();
 
 if (app.Environment.IsDevelopment())
 {

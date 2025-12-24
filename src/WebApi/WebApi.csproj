@@ -26,6 +26,7 @@
         <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Contracts\Contracts.csproj" />
+        <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
     </ItemGroup>
     
 </Project>
