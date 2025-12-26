@@ -1,6 +1,5 @@
 ﻿var builder = DistributedApplication.CreateBuilder(args);
 
-// Только то, что нужно вам
 var sql = builder.AddSqlServer("sqlserver")
     .WithEnvironment("ACCEPT_EULA", "Y")
     .WithEnvironment("SA_PASSWORD", "YourStrong!Passw0rd")
