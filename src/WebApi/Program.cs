@@ -31,14 +31,22 @@ services.AddControllers()
     });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=localhost,1433;Database=PolyclinicDB;User Id=sa;Password=MySecurePassword123!;TrustServerCertificate=True;";
+                       ?? "Server=.\\SQLEXPRESS;Database=PolyclinicDB;Trusted_Connection=True;TrustServerCertificate=True;";
+
+// Логируем (для отладки, скрывая чувствительные данные)
+if (builder.Environment.IsDevelopment())
+{
+    var safeConnectionString = connectionString.Contains("Password=") 
+        ? connectionString.Replace("Password=", "Password=***") 
+        : connectionString;
+    Console.WriteLine($"🔧 Using connection: {safeConnectionString}");
+}
 
 services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
 });
-
 // Репозитории
 services.AddScoped<IPatientRepository, PatientRepository>();
 services.AddScoped<IDoctorRepository, DoctorRepository>();
@@ -75,15 +83,65 @@ services.AddCors(options =>
     });
 });
 
-// Swagger
+// Swagger с XML комментариями
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo 
     { 
         Title = "Polyclinic API", 
-        Version = "v1" 
+        Version = "v1",
+        Description = "API для управления поликлиникой: пациенты, врачи, записи на приём",
+        Contact = new OpenApiContact
+        {
+            Name = "Разработчик",
+            Email = "dev@example.com"
+        }
     });
+    
+    // Включение XML-комментариев
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+        Console.WriteLine($"✅ XML комментарии загружены из: {xmlPath}");
+    }
+    else
+    {
+        Console.WriteLine($"⚠️ XML файл не найден: {xmlPath}");
+        Console.WriteLine("ℹ️ Убедитесь, что в проекте включена генерация XML документации");
+        Console.WriteLine("ℹ️ Добавьте в WebApi.csproj: <GenerateDocumentationFile>true</GenerateDocumentationFile>");
+    }
+    
+    // Опционально: включение аннотаций
+    // c.EnableAnnotations();
+    
+    // Настройка безопасности (если используется)
+    // c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // {
+    //     Description = "JWT Authorization header using the Bearer scheme.",
+    //     Name = "Authorization",
+    //     In = ParameterLocation.Header,
+    //     Type = SecuritySchemeType.Http,
+    //     Scheme = "bearer"
+    // });
+    
+    // c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    // {
+    //     {
+    //         new OpenApiSecurityScheme
+    //         {
+    //             Reference = new OpenApiReference
+    //             {
+    //                 Type = ReferenceType.SecurityScheme,
+    //                 Id = "Bearer"
+    //             }
+    //         },
+    //         Array.Empty<string>()
+    //     }
+    // });
 });
 
 var app = builder.Build();
@@ -104,6 +162,12 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
         options.EnableTryItOutByDefault();
         options.DisplayRequestDuration();
+        options.DefaultModelsExpandDepth(2);
+        options.DefaultModelExpandDepth(2);
+        options.DisplayOperationId();
+        options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+        options.EnableDeepLinking();
+        options.EnableFilter();
     });
 }
 
@@ -132,28 +196,19 @@ try
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     
-    if (await dbContext.Database.CanConnectAsync())
-    {
-        app.Logger.LogInformation("✅ Database connected successfully");
-    }
-    else
-    {
-        app.Logger.LogWarning("⚠️ Cannot connect to database");
-    }
-    
-    app.Logger.LogInformation("🌐 API is running at: https://localhost:5000");
-    app.Logger.LogInformation("📚 Swagger: https://localhost:5000/swagger");
-    app.Logger.LogInformation("🏥 Health check: https://localhost:5000/health");
+    app.Logger.LogInformation("API is running at: https://localhost:5000");
+    app.Logger.LogInformation("Swagger: https://localhost:5000/swagger");
+    app.Logger.LogInformation("Health check: https://localhost:5000/health");
     
     app.Run();
 }
 catch (Exception ex)
 {
-    app.Logger.LogCritical(ex, "❌ Application failed to start");
+    app.Logger.LogCritical(ex, "Application failed to start");
     
     // Детальная информация об ошибке
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine($"\n❌ FATAL ERROR: {ex.Message}");
+    Console.WriteLine($"\nFATAL ERROR: {ex.Message}");
     if (ex.InnerException != null)
     {
         Console.WriteLine($"   Inner Exception: {ex.InnerException.Message}");
