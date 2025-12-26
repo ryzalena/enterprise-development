@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.5.0" />
+        <PackageReference Include="Aspire.NATS.Net" Version="8.0.0" />
         <PackageReference Include="Grpc.Net.Client" Version="2.66.0" />
         <PackageReference Include="NATS.Net" Version="2.5.0" />
         <PackageReference Include="NATS.Client" Version="0.14.5" />
@@ -18,7 +19,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
         <PackageReference Include="Polly" Version="8.4.0" />
         <PackageReference Include="Polly.Extensions" Version="8.4.0" />
     </ItemGroup>

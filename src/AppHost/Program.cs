@@ -1,22 +1,19 @@
-﻿using Aspire.Hosting;
+﻿var builder = DistributedApplication.CreateBuilder(args);
 
-var builder = DistributedApplication.CreateBuilder(args);
-
+// Только то, что нужно вам
 var sql = builder.AddSqlServer("sqlserver")
     .WithEnvironment("ACCEPT_EULA", "Y")
     .WithEnvironment("SA_PASSWORD", "YourStrong!Passw0rd")
-    .AddDatabase("clinicdb");
+    .AddDatabase("PolyclinicDB");
 
-var nats = builder.AddContainer("nats", "nats")
-    .WithArgs("--jetstream");
+var nats = builder.AddNats("nats");
 
-var api = builder.AddProject<Projects.WebApi>("webapi")
+builder.AddProject<Projects.WebApi>("webapi")
     .WithReference(sql)
-    .WithEnvironment("NATS__Url", "nats://nats:4222")
-    .WithEnvironment("NATS__Subject", "appointments.created");
+    .WithReference(nats);
 
-var generator = builder.AddProject<Projects.DataGenerator>("datagenerator")
-    .WithEnvironment("NATS__Url", "nats://nats:4222")
-    .WithEnvironment("NATS__Subject", "appointments.created");
+builder.AddProject<Projects.DataGenerator>("datagenerator")
+    .WithReference(sql)
+    .WithReference(nats);
 
 builder.Build().Run();

@@ -4,56 +4,84 @@ using Microsoft.Extensions.Logging;
 
 namespace DataGenerator.Services;
 
-public class ContractGeneratorService : BackgroundService
+public class DataGenerationService : BackgroundService
 {
-    private readonly INatsService _natsService;
-    private readonly ILogger<ContractGeneratorService> _logger;
-    private readonly Faker<AppointmentCreated> _appointmentFaker;
-    
-    public ContractGeneratorService(
-        INatsService natsService,
-        ILogger<ContractGeneratorService> logger)
+    private readonly NatsService _natsService;
+    private readonly ILogger<DataGenerationService> _logger;
+    private readonly Faker _faker = new("ru");
+
+    public DataGenerationService(
+        NatsService natsService, 
+        ILogger<DataGenerationService> logger)
     {
         _natsService = natsService;
         _logger = logger;
-        
-        _appointmentFaker = new Faker<AppointmentCreated>()
-            .RuleFor(a => a.Id, f => Guid.NewGuid())
-            .RuleFor(a => a.PatientId, f => f.Random.Number(1, 100))
-            .RuleFor(a => a.DoctorId, f => f.Random.Number(1, 50))
-            .RuleFor(a => a.AppointmentDate, f => f.Date.Future())
-            .RuleFor(a => a.CreatedAt, f => DateTime.UtcNow);
     }
-    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _natsService.ConnectAsync(stoppingToken);
+        _logger.LogInformation("📊 Data generation service started");
         
-        _logger.LogInformation("Starting appointment generation...");
+        // Ждем 5 секунд чтобы убедиться что NATS подключился
+        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        
+        var patientCount = 0;
+        var doctorCount = 0;
         
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var appointment = _appointmentFaker.Generate();
-                var success = await _natsService.PublishContractAsync(appointment, stoppingToken);
-                
-                if (success)
+                // Чередуем генерацию пациентов и врачей
+                if (patientCount <= doctorCount)
                 {
-                    _logger.LogInformation(
-                        "Generated appointment {AppointmentId} for patient {PatientId} with doctor {DoctorId}", 
-                        appointment.Id, appointment.PatientId, appointment.DoctorId);
+                    // Генерация пациента
+                    patientCount++;
+                    var patient = new
+                    {
+                        Type = "Patient",
+                        Id = Guid.NewGuid(),
+                        PatientId = patientCount,
+                        FirstName = _faker.Name.FirstName(),
+                        LastName = _faker.Name.LastName(),
+                        BirthDate = _faker.Date.Past(70, DateTime.Now.AddYears(-18)),
+                        InsuranceNumber = $"INS-{DateTime.Now:yyyyMMdd}-{patientCount:0000}",
+                        Phone = _faker.Phone.PhoneNumber(),
+                        GeneratedAt = DateTime.UtcNow
+                    };
+                    
+                    await _natsService.PublishAsync(patient);
+                    _logger.LogInformation($"👤 Patient #{patientCount}: {patient.LastName} {patient.FirstName}");
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to publish appointment {AppointmentId}", appointment.Id);
+                    // Генерация врача
+                    doctorCount++;
+                    var doctor = new
+                    {
+                        Type = "Doctor",
+                        Id = Guid.NewGuid(),
+                        DoctorId = doctorCount,
+                        FirstName = _faker.Name.FirstName(),
+                        LastName = _faker.Name.LastName(),
+                        Specialization = _faker.PickRandom(
+                            new[] { "Терапевт", "Хирург", "Кардиолог", "Невролог", "Педиатр" }
+                        ),
+                        License = $"LIC-{DateTime.Now.Year}-{doctorCount:0000}",
+                        GeneratedAt = DateTime.UtcNow
+                    };
+                    
+                    await _natsService.PublishAsync(doctor);
+                    _logger.LogInformation($"👨‍⚕️ Doctor #{doctorCount}: {doctor.LastName} {doctor.FirstName} ({doctor.Specialization})");
                 }
                 
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                // Случайная задержка 3-8 секунд
+                var delay = _faker.Random.Int(3000, 8000);
+                await Task.Delay(delay, stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating appointment");
+                _logger.LogError(ex, "❌ Error in data generation");
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }

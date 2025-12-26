@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace WebApi.Controllers;
 
+/// <summary>
+/// Контроллер для управления медицинскими контрактами
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ContractsController : ControllerBase
@@ -12,6 +15,11 @@ public class ContractsController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ILogger<ContractsController> _logger;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр контроллера контрактов
+    /// </summary>
+    /// <param name="configuration">Конфигурация приложения</param>
+    /// <param name="logger">Логгер</param>
     public ContractsController(
         IConfiguration configuration,
         ILogger<ContractsController> logger)
@@ -20,6 +28,12 @@ public class ContractsController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Получить список контрактов с пагинацией
+    /// </summary>
+    /// <param name="page">Номер страницы (начиная с 0)</param>
+    /// <param name="pageSize">Размер страницы</param>
+    /// <returns>Страница контрактов</returns>
     [HttpGet]
     public async Task<IActionResult> GetContracts(
         [FromQuery] int page = 0,
@@ -94,6 +108,11 @@ public class ContractsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Получить контракт по идентификатору
+    /// </summary>
+    /// <param name="id">Идентификатор контракта</param>
+    /// <returns>Контракт</returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetContract(string id)
     {

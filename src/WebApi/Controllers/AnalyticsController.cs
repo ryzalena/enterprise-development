@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Application.Dtos;
 using Domain.Interfaces;
 
 namespace WebApi.Controllers;
 
+/// <summary>
+/// Контроллер для аналитики и отчетов
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -13,6 +16,11 @@ public class AnalyticsController(
     IPatientService patientService,
     IAppointmentService appointmentService) : ControllerBase
 {
+    /// <summary>
+    /// Получить врачей с опытом работы не менее указанного количества лет
+    /// </summary>
+    /// <param name="minYears">Минимальное количество лет опыта</param>
+    /// <returns>Список врачей с указанным опытом</returns>
     [HttpGet("doctors/experience/{minYears}")]
     public async Task<ActionResult<List<DoctorDto>>> GetDoctorsWithExperience(int minYears)
     {
@@ -30,6 +38,11 @@ public class AnalyticsController(
         return Ok(dtos);
     }
 
+    /// <summary>
+    /// Получить пациентов по врачу
+    /// </summary>
+    /// <param name="doctorId">Идентификатор врача</param>
+    /// <returns>Список пациентов врача</returns>
     [HttpGet("doctors/{doctorId}/patients")]
     public async Task<ActionResult<List<PatientDto>>> GetPatientsByDoctor(int doctorId)
     {
@@ -50,6 +63,10 @@ public class AnalyticsController(
         return Ok(dtos);
     }
 
+    /// <summary>
+    /// Получить количество повторных приемов за последний месяц
+    /// </summary>
+    /// <returns>Количество повторных приемов</returns>
     [HttpGet("appointments/follow-up/last-month")]
     public async Task<ActionResult<int>> GetFollowUpAppointmentsCountLastMonth()
     {
@@ -57,6 +74,10 @@ public class AnalyticsController(
         return Ok(new { count });
     }
 
+    /// <summary>
+    /// Получить пациентов старше 30 лет, посещающих нескольких врачей
+    /// </summary>
+    /// <returns>Список пациентов</returns>
     [HttpGet("patients/over-30-multiple-doctors")]
     public async Task<ActionResult<List<PatientDto>>> GetPatientsOver30WithMultipleDoctors()
     {
@@ -77,6 +98,11 @@ public class AnalyticsController(
         return Ok(dtos);
     }
 
+    /// <summary>
+    /// Получить записи на прием в указанном кабинете за текущий месяц
+    /// </summary>
+    /// <param name="roomNumber">Номер кабинета</param>
+    /// <returns>Список записей на прием</returns>
     [HttpGet("appointments/room/{roomNumber}/current-month")]
     public async Task<ActionResult<List<AppointmentDto>>> GetAppointmentsInRoomForCurrentMonth(string roomNumber)
     {

@@ -10,7 +10,6 @@
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:21117",
         "DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL": "http://localhost:21118",
-        "ASPNETCORE_URLS": "http://127.0.0.1:0",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true"
       },
       "hotReloadProfile": "aspnetcore"

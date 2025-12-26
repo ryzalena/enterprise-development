@@ -4,9 +4,14 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsAspireService>true</IsAspireService>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.NATS.Net" Version="8.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="6.6.2" />
         <PackageReference Include="NATS.Net" Version="2.5.0" />
         <PackageReference Include="NATS.Client" Version="0.14.5" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />

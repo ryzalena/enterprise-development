@@ -1,0 +1,31 @@
+﻿version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD="YourStrong!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"   # NATS клиентский порт
+      - "8222:8222"   # NATS мониторинг порт
+    command: ["-js", "-m", "8222"]
+
+  nats-ui:
+    image: synadia/nats-board:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+
+volumes:
+  sqlserver_data:

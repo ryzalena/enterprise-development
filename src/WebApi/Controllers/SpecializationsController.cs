@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Domain.Interfaces;
 using Application.Dtos;
 using Domain.Entities;
 
 namespace WebApi.Controllers;
 
+/// <summary>
+/// Контроллер для управления специализациями врачей
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -12,6 +15,10 @@ namespace WebApi.Controllers;
 public class SpecializationsController(
     ISpecializationService service) : ControllerBase
 {
+    /// <summary>
+    /// Получить все специализации
+    /// </summary>
+    /// <returns>Список всех специализаций</returns>
     [HttpGet]
     public async Task<ActionResult<List<SpecializationDto>>> GetSpecializations()
     {
@@ -26,6 +33,11 @@ public class SpecializationsController(
         return Ok(dtos);
     }
 
+    /// <summary>
+    /// Получить специализацию по идентификатору
+    /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <returns>Специализация</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<SpecializationDto>> GetSpecialization(int id)
     {
@@ -45,6 +57,11 @@ public class SpecializationsController(
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Создать новую специализацию
+    /// </summary>
+    /// <param name="dto">Данные для создания специализации</param>
+    /// <returns>Созданная специализация</returns>
     [HttpPost]
     public async Task<ActionResult<SpecializationDto>> CreateSpecialization(
         [FromBody] SpecializationManipulationDto dto)
@@ -71,6 +88,12 @@ public class SpecializationsController(
             resultDto);
     }
 
+    /// <summary>
+    /// Обновить специализацию
+    /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <param name="dto">Данные для обновления специализации</param>
+    /// <returns>Результат операции</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSpecialization(
         int id,
@@ -89,6 +112,11 @@ public class SpecializationsController(
         return NoContent();
     }
 
+    /// <summary>
+    /// Удалить специализацию
+    /// </summary>
+    /// <param name="id">Идентификатор специализации</param>
+    /// <returns>Результат операции</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSpecialization(int id)
     {

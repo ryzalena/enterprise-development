@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using Domain.Interfaces;
 using Application.Dtos;
 using Domain.Entities;
 
 namespace WebApi.Controllers;
 
+/// <summary>
+/// Контроллер для управления записями на прием
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -14,6 +17,10 @@ public class AppointmentsController(
     IPatientService patientService,
     IDoctorService doctorService) : ControllerBase
 {
+    /// <summary>
+    /// Получить все записи на прием
+    /// </summary>
+    /// <returns>Список всех записей на прием</returns>
     [HttpGet]
     public async Task<ActionResult<List<AppointmentDto>>> GetAppointments()
     {
@@ -52,6 +59,11 @@ public class AppointmentsController(
         return Ok(dtos);
     }
 
+    /// <summary>
+    /// Получить запись на прием по идентификатору
+    /// </summary>
+    /// <param name="id">Идентификатор записи на прием</param>
+    /// <returns>Запись на прием</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<AppointmentDto>> GetAppointment(int id)
     {
@@ -92,6 +104,11 @@ public class AppointmentsController(
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Создать новую запись на прием
+    /// </summary>
+    /// <param name="dto">Данные для создания записи на прием</param>
+    /// <returns>Созданная запись на прием</returns>
     [HttpPost]
     public async Task<ActionResult<AppointmentDto>> CreateAppointment(
         [FromBody] AppointmentManipulationDto dto)
@@ -154,6 +171,12 @@ public class AppointmentsController(
             resultDto);
     }
 
+    /// <summary>
+    /// Обновить запись на прием
+    /// </summary>
+    /// <param name="id">Идентификатор записи на прием</param>
+    /// <param name="dto">Данные для обновления записи на прием</param>
+    /// <returns>Результат операции</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAppointment(
         int id,
@@ -186,6 +209,11 @@ public class AppointmentsController(
         return NoContent();
     }
 
+    /// <summary>
+    /// Удалить запись на прием
+    /// </summary>
+    /// <param name="id">Идентификатор записи на прием</param>
+    /// <returns>Результат операции</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAppointment(int id)
     {
